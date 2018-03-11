@@ -1,6 +1,4 @@
-const Realm = require("realm");
-
-const userSchema = {
+export const userSchema = {
 	name: "User",
 	properties: {
 		login: "string",
@@ -12,7 +10,7 @@ const userSchema = {
 	}
 };
 
-const tripSchema = {
+export const tripSchema = {
 	name: "Trip",
 	properties: {
 		dateOfArrival: "date",
@@ -21,7 +19,7 @@ const tripSchema = {
 	}
 };
 
-const legOfTripSchema = {
+export const legOfTripSchema = {
 	name: "LegOfTrip",
 	properties: {
 		dateOfArrival: "date",
@@ -32,7 +30,7 @@ const legOfTripSchema = {
 	}
 };
 
-const budgetSchema = {
+export const budgetSchema = {
 	name: "Budget",
 	properties: {
 		typeOfBudget: "string",
@@ -42,17 +40,17 @@ const budgetSchema = {
 	}
 };
 
-const budgetByCategorySchema = {
+export const budgetByCategorySchema = {
 	name: "BudgetByCategory",
 	properties: {
-		type: "string",
+		category: "string",
 		budgetPlanned: { type: "double", default: 0 },
 		budgetSpent: { type: "double", default: 0 },
 		expenditures: { type: "list", objectType: "Expenditure" }
 	}
 };
 
-const expenditureSchema = {
+export const expenditureSchema = {
 	name: "Expenditure",
 	properties: {
 		date: { type: "date", default: new Date() },
@@ -61,7 +59,7 @@ const expenditureSchema = {
 	}
 };
 
-const countrySchema = {
+export const countrySchema = {
 	name: "Country",
 	properties: {
 		name: "string",
@@ -69,7 +67,7 @@ const countrySchema = {
 	}
 };
 
-const townSchema = {
+export const townSchema = {
 	name: "Town",
 	properties: {
 		name: "string",
@@ -78,7 +76,7 @@ const townSchema = {
 	}
 };
 
-const budgetForecastSchema = {
+export const budgetForecastSchema = {
 	name: "BudgetForecast",
 	properties: {
 		type: "string",
@@ -92,7 +90,7 @@ const budgetForecastSchema = {
 	}
 };
 
-const statisticsForBudgetSchema = {
+export const statisticsForBudgetSchema = {
 	name: "StatisticsForBudget",
 	properties: {
 		statisticsAreDefined: { type: "bool", default: false },
@@ -106,28 +104,11 @@ const statisticsForBudgetSchema = {
 	}
 };
 
-const currencySchema = {
+export const currencySchema = {
 	name: "Currency",
 	properties: {
 		name: "string",
-		valueAgainstOneDollar: "double"
+		symbol: "string",
+		valueAgainstOneEuro: { type: "double", default: 1 }
 	}
 };
-
-export let realm = new Realm({
-	path: "newRealm",
-	schema: [
-		userSchema,
-		tripSchema,
-		legOfTripSchema,
-		budgetSchema,
-		budgetByCategorySchema,
-		expenditureSchema,
-		countrySchema,
-		town,
-		budgetForecastSchema,
-		statisticsForBudgetSchema,
-		currencySchema
-	],
-	deleteRealmIfMigrationNeeded: true
-});
