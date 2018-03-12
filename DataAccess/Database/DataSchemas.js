@@ -24,7 +24,6 @@ export const legOfTripSchema = {
 	properties: {
 		dateOfArrival: "date",
 		dateOfDeparture: "date",
-		valueOfLocalCurrency: { type: "double", default: 1 },
 		town: { type: "Town" },
 		budget: { type: "Budget" }
 	}

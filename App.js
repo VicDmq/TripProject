@@ -8,22 +8,13 @@ import { realm } from "./DataAccess/Database/Realm";
 // import { createDatabase } from "./DataAccess/Scripts/CreateDatabase";
 import { addUser, updateUser } from "./DataAccess/ObjectsRepository/UserRepository";
 import { addCountry } from "./DataAccess/ObjectsRepository/CountryRepository";
-import { addCurrency, convert } from "./DataAccess/ObjectsRepository/CurrencyRepository";
+import { addCurrency, createCurrencies } from "./DataAccess/ObjectsRepository/CurrencyRepository";
 import { getRateFromBase, test } from "./Api/Fixer";
 
 export default class App extends Component {
 	constructor(props) {
 		super(props);
 		// createDatabase();
-		const createCurrency = async () => {
-			const dollar = await addCurrency("Dollar", "USD");
-			console.log(dollar);
-		};
-		createCurrency();
-		// const dollars = addCurrency("Dollar", "USD");
-		// const usa = addCountry("USA", dollars);
-		// const user = addUser("dmq", "vic", "Domecq", "Victor", usa);
-		// updateUser(user, user.login, user.password, user.lastName, "Dominique");
 		this.state = {
 			realm: realm
 		};
@@ -32,8 +23,6 @@ export default class App extends Component {
 	componentDidMount() {}
 
 	render() {
-		// length = this.state.realm.objects("User").length;
-		// console.log(this.state.realm.objects("User")[length - 1]);
 		return <Examples />;
 	}
 }

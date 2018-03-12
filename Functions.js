@@ -1,6 +1,14 @@
-export const convertToUserCurrency = (priceToConvert, valueOfLocalCurrency) => {
-	const priceConverted = roundTo2Decimals(priceToConvert / valueOfOtherCurrency);
-	return priceConverted;
+export const convertToUserCurrency = (priceToConvert, userCurrency, otherCurrency) => {
+	const priceInEuro = convertToEuro(priceToConvert, otherCurrency);
+	if (UserCurrency.name === "Euro") {
+		return roundTo2Decimals(priceInEuro);
+	} else {
+		return roundTo2Decimals(priceInEuro * userCurrency.valueAgainstOneEuro);
+	}
+};
+
+export const convertToEuro = (priceToConvert, currency) => {
+	return priceToConvert / currency.valueAgainstOneEuro;
 };
 
 export const roundTo2Decimals = valueToRound => {
