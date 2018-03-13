@@ -1,20 +1,14 @@
 import React, { Component } from "react";
-// import { Platform, StyleSheet, Text, View } from "react-native";
 import { FlatList, ActivityIndicator, Text, View } from "react-native";
 import { Examples } from "@shoutem/ui";
 const Realm = require("realm");
 import { realm } from "./DataAccess/Database/Realm";
-
-// import { createDatabase } from "./DataAccess/Scripts/CreateDatabase";
-import { addUser, updateUser } from "./DataAccess/ObjectsRepository/UserRepository";
-import { addCountry } from "./DataAccess/ObjectsRepository/CountryRepository";
-import { addCurrency, createCurrencies } from "./DataAccess/ObjectsRepository/CurrencyRepository";
-import { getRateFromBase, test } from "./Api/Fixer";
+import { createData } from "./DataAccess/Scripts/createData";
 
 export default class App extends Component {
 	constructor(props) {
 		super(props);
-		// createDatabase();
+		createData();
 		this.state = {
 			realm: realm
 		};

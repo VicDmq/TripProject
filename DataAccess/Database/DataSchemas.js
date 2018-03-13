@@ -52,8 +52,8 @@ export const budgetByCategorySchema = {
 export const expenditureSchema = {
 	name: "Expenditure",
 	properties: {
-		date: { type: "date", default: new Date() },
-		price: { type: "double", default: 0 },
+		date: { type: "date" },
+		price: { type: "double" },
 		justification: { type: "string", optional: true }
 	}
 };

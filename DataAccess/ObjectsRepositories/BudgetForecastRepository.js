@@ -1,48 +1,10 @@
-import { createObject, addObjecToPropertyList, updateObjectProperty } from "../Scripts/UpdateDatabase";
+import { updateObjectProperty } from "../Scripts/UpdateDatabase";
+import { getObjectsFiltered } from "../Scripts/Requests";
+import { roundTo2Decimals } from "../../Functions";
 
-export const addTown = (name, country) => {
-	const properties = {
-		name: name,
-		country: country
-	};
-
-	const newTown = createObject("Town", properties);
-
-	const propertiesForBudgetForecast = {
-		type: "lowBudget",
-		statisticsFortotalBudget: {},
-		statisticsForTransport: {},
-		statisticsForHousing: {},
-		statisticsForFood: {},
-		statisticsForShopping: {},
-		statisticsForSightseeing: {},
-		statisticsForLeisureActivities: {}
-	};
-	const lowBudgetForecast = createObject("BudgetForecast", propertiesForBudgetForecast);
-
-	propertiesForBudgetForecast.type = "mediumBudget";
-	const mediumBudgetForecast = createObject("BudgetForecast", propertiesForBudgetForecast);
-
-	propertiesForBudgetForecast.type = "highBudget";
-	const highBudgetForecast = createObject("BudgetForecast", propertiesForBudgetForecast);
-
-	addObjecToPropertyList(newTown, "budgetForecast", lowBudgetForecast);
-	addObjecToPropertyList(newTown, "budgetForecast", mediumBudgetForecast);
-	addObjecToPropertyList(newTown, "budgetForecast", highBudgetForecast);
-
-	return newTown;
-};
-
-export const updateTown = town => {
-	updateBudgetForecast(town, "lowBudget");
-	updateBudgetForecast(town, "mediumBudget");
-	updateBudgetForecast(town, "highBudget");
-};
-
-const updateBudgetForecast = (town, typeOfBudget) => {
-	const legsOfTrip = realm
-		.objects("LegOfTrip")
-		.filtered("town.name = $0 AND budget.typeOfBudget=$1", town.name, typeOfBudget);
+export const updateBudgetForecast = (town, typeOfBudget) => {
+	const request = "town.name ='" + town.name + "' AND budget.typeOfBudget='" + typeOfBudget + "'";
+	const legsOfTrip = getObjectsFiltered("LegOfTrip", request);
 	//Récupére toutes les étapes des voyageurs pour une ville et un type de budget donnés
 
 	const totalBudgets = [];
@@ -74,8 +36,9 @@ const updateBudgetForecast = (town, typeOfBudget) => {
 		}
 	} //Permet de remplir les tableaux ci-dessus
 
-	const budgetForecast = town.budgetForecast.filter(budgetForecast => budgetForecast.type === "lowBudget")[0];
+	const budgetForecast = town.budgetForecast.filter(budgetForecast => budgetForecast.type === typeOfBudget)[0];
 
+	//Mise à jour des nouvelles données dans la table budgetForecast
 	updateObjectProperty(budgetForecast, "statisticsFortotalBudget", getStatisticsProperties(totalBudgets));
 	updateObjectProperty(budgetForecast, "statisticsForTransport", getStatisticsProperties(budgetsForTransport));
 	updateObjectProperty(budgetForecast, "statisticsForHousing", getStatisticsProperties(budgetsForHousing));
@@ -102,7 +65,7 @@ const addToBudgetList = (budget, budgetsForType, category, nbDay) => {
 	}
 };
 
-export const getStatisticsProperties = budgets => {
+const getStatisticsProperties = budgets => {
 	if (budgets.length !== 0) {
 		let avgBudgetSpent = 0;
 		let avgBudgetPlanned = 0;
@@ -133,14 +96,17 @@ export const getStatisticsProperties = budgets => {
 		}
 		avgBudgetSpent /= numberOfForecast;
 		avgBudgetPlanned /= numberOfForecast;
-		stdErrorWithForecast = avgBudgetPlanned === 0 ? (avgBudgetSpent - avgBudgetPlanned) * 100 / avgBudgetPlanned : null;
+		//Défini seulement si la moyenne des budgets plannifiés est différente de 0 (pour éviter division par 0)
+		stdErrorWithForecast = avgBudgetPlanned !== 0 ? (avgBudgetSpent - avgBudgetPlanned) * 100 / avgBudgetPlanned : null;
 
+		//Calcul de l'écart type
 		for (var i = 0; i < budgets.length; i++) {
 			const budgetSpent = budgets[i].budgetSpent;
 			stdDeviation += Math.pow(budgetSpent - avgBudgetSpent, 2);
 		}
 		stdDeviation /= numberOfForecast;
 
+		//Arrondi à la deuxième décimal
 		avgBudgetSpent = roundTo2Decimals(avgBudgetSpent);
 		avgBudgetPlanned = roundTo2Decimals(avgBudgetPlanned);
 		minBudgetSpent = roundTo2Decimals(minBudgetSpent);
@@ -148,6 +114,7 @@ export const getStatisticsProperties = budgets => {
 		stdDeviation = roundTo2Decimals(stdDeviation);
 		stdErrorWithForecast = stdErrorWithForecast ? roundTo2Decimals(stdErrorWithForecast) : null;
 
+		//Envoi d'un JSON correspondant aux propriétés de la table StatisticsForBudget
 		return {
 			statisticsAreDefined: true,
 			avgBudgetSpent: avgBudgetSpent,
@@ -159,6 +126,7 @@ export const getStatisticsProperties = budgets => {
 			numberOfForecast: numberOfForecast
 		};
 	} else {
+		//Envois un JSON vide si aucune données
 		return {};
 	}
 };

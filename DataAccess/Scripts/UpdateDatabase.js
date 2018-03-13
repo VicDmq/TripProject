@@ -20,7 +20,7 @@ export const updateObjectProperty = (object, property, newProperty) => {
 
 //Permet de rajouter un objet à une propriété de type liste d'un objet
 //Cet objet peut également être un string, char, double, ...
-export const addObjecToPropertyList = (object, property, objectToBeAdded) => {
+export const addObjectToPropertyList = (object, property, objectToBeAdded) => {
 	realm.write(() => {
 		object[property].push(objectToBeAdded);
 		//object[property] est équivalent à object.property
@@ -43,7 +43,7 @@ export const deleteObjects = typeOfObject => {
 };
 
 //Supprime la base de données
-export const deleteAll = () => {
+export const clearDatabase = () => {
 	realm.write(() => {
 		realm.deleteAll();
 	});

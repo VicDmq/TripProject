@@ -1,6 +1,6 @@
 import { createObject, updateObjectProperty } from "../Scripts/UpdateDatabase";
-import { getRatesFromEuro, getSymbols } from "../../Api/Fixer";
-import { getObjects } from "../Scripts/Requests";
+import { getRatesFromEuro, getSymbols } from "../../Api/Fixer/Fixer";
+import { getObjects, getObjectsFiltered } from "../Scripts/Requests";
 
 //Création d'une monnaie avec rates = valeur optionnel
 //Cela permet de ne faire qu'une seule fois la requête à l'api
@@ -48,17 +48,18 @@ export const updateCurrenciesValues = async () => {
 
 //Création de toutes les monnaies disponibles sur l'API
 //Remarque : les noms sont en anglais
-export const addCurrenciesFromApi = async () => {
+export const updateCurrenciesFromApi = async () => {
 	let symbols = await getSymbols();
 	//Formatage du JSON
 	symbols = eval(symbols);
 
 	const rates = await getRatesFromEuro();
 
-	deleteObjects("Currency");
-	//On supprime tout pour éviter les duplicatas
-
 	for (var symbol in symbols) {
-		addCurrency(symbols[symbol], symbol, rates);
+		const request = "name='" + symbols[symbol] + "' AND symbol='" + symbol + "'";
+		const currency = getObjectsFiltered("Currency", request);
+		if (currency.length === 0) {
+			addCurrency(symbols[symbol], symbol, rates);
+		}
 	}
 };

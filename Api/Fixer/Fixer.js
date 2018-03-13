@@ -1,5 +1,5 @@
 //Api utilisée pour la gestion des devises
-const accessKey = "671ff47a2641f604431c12e81efde1a3";
+const accessKey = "671ff47a2641f604431c12e81efde1a3AA";
 import { defaultRatesWithEuroBase, defaultSymbols } from "./FixerDefault";
 
 export const getRatesFromEuro = async () => {
