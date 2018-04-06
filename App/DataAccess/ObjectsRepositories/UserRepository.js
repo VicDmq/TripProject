@@ -1,4 +1,6 @@
 import { createObject, updateObjectProperty } from "../Scripts/UpdateDatabase";
+import { getObjectsFiltered } from "../Scripts/Requests";
+import { AsyncStorage } from "react-native";
 
 //TODO : Créer une fonction qui permet d'avoir automatiquement
 //la localisation de l'utilisateur
@@ -23,4 +25,11 @@ export const updateUser = (user, newLogin, newPassword, newLastName, newFirstNam
 	updateObjectProperty(user, "lastName", newLastName);
 	updateObjectProperty(user, "firstName", newFirstName);
 	updateObjectProperty(user, "location", newLocation);
+};
+
+export const getUserConnected = async () => {
+	const login = await AsyncStorage.getItem("userLogin");
+	const password = await AsyncStorage.getItem("userPassword");
+	const request = "login ='" + login + "' AND password='" + password + "'";
+	return getObjectsFiltered("User", request)[0];
 };
