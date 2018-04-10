@@ -1,23 +1,38 @@
 import React, { Component } from "react";
-import { Text, View, Button } from "react-native";
-//import { Screen } from "@shoutem/ui";
+import { Text, View, Button } from "@shoutem/ui";
+
+import SpinnerComponent from "../Components/Spinner";
+import NavBarComponent from "../Components/NavBar";
+
+import { getConnectedUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
 
 export default class UserAccountScreen extends Component {
 	constructor(props) {
 		super(props);
-		const { params } = this.props.navigation.state;
 		this.state = {
-			login: params.login
+			user: undefined
 		};
+		this.setUser();
 	}
 
+	setUser = async () => {
+		const user = await getConnectedUser();
+		this.setState({ user: user });
+	};
+
 	render() {
-		return (
-			<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-				<Text>{this.state.login}</Text>
-				<Text>Hey Account ! </Text>
-				<Button title="Go to Home" onPress={() => this.props.navigation.goBack()} />
-			</View>
-		);
+		if (this.state.user == undefined) {
+			return <SpinnerComponent />;
+		} else {
+			return (
+				<View style={{ flex: 1 }}>
+					<NavBarComponent title={"Compte"} logoutButton={true} />
+					<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+						<Text>{this.state.user.login}</Text>
+						<Text>Hey Account ! </Text>
+					</View>
+				</View>
+			);
+		}
 	}
 }

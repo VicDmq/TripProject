@@ -35,5 +35,5 @@ export const createData = async () => {
 	addExpenditure(washingtonTrip.budget, "Food", 2.5, new Date(), "Bière");
 
 	updateTown(washington);
-	console.log(washington.budgetForecast[0]);
+	// console.log(washington.budgetForecast[0]);
 };

@@ -5,7 +5,7 @@ export const userSchema = {
 		password: "string",
 		lastName: "string",
 		firstName: "string",
-		location: { type: "Country" },
+		currency: { type: "Currency" },
 		trips: { type: "list", objectType: "Trip" }
 	}
 };
