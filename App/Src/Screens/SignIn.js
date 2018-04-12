@@ -65,7 +65,7 @@ export default class SignInScreen extends Component {
 					</Title>
 					<Caption style={{ marginBottom: 25 }}>Commencez par vous connecter ;-)</Caption>
 					<Image styleName="medium-avatar" style={{ marginBottom: 20 }} source={require("../Images/map.jpg")} />
-
+					{/* Login */}
 					<TextInput
 						value={this.state.login}
 						placeholder={"Identifiant"}
@@ -74,7 +74,7 @@ export default class SignInScreen extends Component {
 						}}
 						style={{ marginBottom: 5 }}
 					/>
-
+					{/* Mot de passe  */}
 					<TextInput
 						secureTextEntry
 						value={this.state.password}
@@ -85,6 +85,7 @@ export default class SignInScreen extends Component {
 						style={{ marginBottom: 15 }}
 					/>
 
+					{/* Boutons pour connexion et ajout de compte */}
 					<View styleName="horizontal h-center" style={{ marginTop: 20 }}>
 						<Button
 							styleName="create-account"
@@ -101,7 +102,7 @@ export default class SignInScreen extends Component {
 						</Button>
 					</View>
 				</View>
-
+				{/* Composant permettant d'afficher messages d'erreur et de succès */}
 				<DropdownAlert
 					ref={ref => {
 						this.dropdown = ref;

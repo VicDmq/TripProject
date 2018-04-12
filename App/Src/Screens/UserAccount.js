@@ -27,10 +27,6 @@ export default class UserAccountScreen extends Component {
 			return (
 				<View style={{ flex: 1 }}>
 					<NavBarComponent title={"Compte"} logoutButton={true} />
-					<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-						<Text>{this.state.user.login}</Text>
-						<Text>Hey Account ! </Text>
-					</View>
 				</View>
 			);
 		}

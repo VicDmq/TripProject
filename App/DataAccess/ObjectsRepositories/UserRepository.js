@@ -7,6 +7,11 @@ import { AsyncStorage } from "react-native";
 
 //Création d'un utilisateur
 export const addUser = (login, password, lastName, firstName, currency) => {
+	//On commence par vérifier si le login n'existe pas
+	checkIfLoginAlreadyExist(login);
+	//Puis on s'assure que les champs obligatoires ont bien été remplis
+	checkRequiredFields(login, password);
+
 	const properties = {
 		login: login,
 		password: password,
@@ -20,11 +25,30 @@ export const addUser = (login, password, lastName, firstName, currency) => {
 };
 
 export const updateUser = (user, newLogin, newPassword, newLastName, newFirstName, newCurrency) => {
+	//Même chose que pour l'ajout
+	checkIfLoginAlreadyExist(login);
+	checkRequiredFields(login, password);
+
 	updateObjectProperty(user, "login", newLogin);
 	updateObjectProperty(user, "password", newPassword);
 	updateObjectProperty(user, "lastName", newLastName);
 	updateObjectProperty(user, "firstName", newFirstName);
 	updateObjectProperty(user, "currency", newCurrency);
+};
+
+//Retourne une erreur si le login existe déjà
+const checkIfLoginAlreadyExist = login => {
+	const request = "login ='" + login + "'";
+	if (getObjectsFiltered("User", request).length !== 0) {
+		throw new Error("Cet identifiant existe déjà !");
+	}
+};
+
+//Retourne une erreur si les champs obligatoires ne sont pas remplis
+const checkRequiredFields = (login, password) => {
+	if (login === "" || password === "") {
+		throw new Error("Les champs obligatoires n'ont pas été remplis !");
+	}
 };
 
 //Ces fonctions sont utilisées afin de stocker l'utilisateur connecté (permet de se connecter directement à l'app)
@@ -40,9 +64,21 @@ export const removeConnectedUser = async () => {
 };
 
 //On récupère les données de l'utilisateur grâce à l'id et au mdp stockés
-export const getConnectedUser = async () => {
+export const getConnectedUserTokens = async () => {
+	let tokens = undefined;
 	const login = await AsyncStorage.getItem("userLogin");
 	const password = await AsyncStorage.getItem("userPassword");
+	if (login !== null && password !== null) {
+		tokens = {
+			login: login,
+			password: password
+		};
+	}
+	return tokens;
+};
+
+//Requête permettant de récupérer l'utilisateur connecté dans l'application
+export const getConnectedUser = (login, password) => {
 	const request = "login ='" + login + "' AND password='" + password + "'";
 	return getObjectsFiltered("User", request)[0];
 };

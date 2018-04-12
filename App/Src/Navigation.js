@@ -1,5 +1,7 @@
 import { StackNavigator, TabNavigator, TabBarBottom, SwitchNavigator } from "react-navigation";
 import React from "react";
+
+//Icônes de TabBar
 import Icon from "react-native-vector-icons/FontAwesome";
 
 //Écrans inclus dans AppTab
@@ -16,6 +18,7 @@ import SignUpScreen from "./Screens/SignUp";
 import ModalMessageBoxComponent from "./Components/MessageBoxModal";
 import AuthLoadingScreen from "./Screens/AuthLoading";
 
+//StackNavigator utilisé pour la connexion et l'inscription
 const AuthStack = StackNavigator(
 	{
 		SignIn: { screen: SignInScreen },
@@ -28,6 +31,8 @@ const AuthStack = StackNavigator(
 	}
 );
 
+//TabNavigator utilisé une fois que l'utilisateur est connecté : navigation au sein de l'app
+//C'est ici que la tabbar est stylisé
 const AppTab = TabNavigator(
 	{
 		Home: {
@@ -35,51 +40,56 @@ const AppTab = TabNavigator(
 			navigationOptions: {
 				tabBarLabel: "Accueil",
 				tabBarIcon: ({ focused, tintColor }) => {
-					return <Icon name="ios-information-circle-outline" size={30} color={tintColor} />;
+					return <Icon name="home" size={22} color={tintColor} />;
 				}
 			}
 		},
 		Trip: {
 			screen: UserTripsScreen,
 			navigationOptions: {
-				tabBarLabel: "Accueil"
+				tabBarLabel: "Mes voyages",
+				tabBarIcon: ({ focused, tintColor }) => {
+					return <Icon name="map-signs" size={22} color={tintColor} />;
+				}
 			}
 		},
 		UsersDatas: {
 			screen: UserDatasScreen,
 			navigationOptions: {
-				tabBarLabel: "Accueil"
+				tabBarLabel: "Données voyages",
+				tabBarIcon: ({ focused, tintColor }) => {
+					return <Icon name="database" size={22} color={tintColor} />;
+				}
 			}
 		},
 		Account: {
 			screen: UserAccountScreen,
 			navigationOptions: {
-				tabBarLabel: "Accueil"
+				tabBarLabel: "Compte",
+				tabBarIcon: ({ focused, tintColor }) => {
+					return <Icon name="user" size={22} color={tintColor} />;
+				}
 			}
 		}
 	},
 	{
-		// navigationOptions: ({ navigation }) => ({
-		// 	tabBarIcon: <Icon name="rocket" size={30} color="#900" />
-		// 	// tabBarIcon: ({ focused, tintColor }) => {
-		// 	// 	const { routeName } = navigation.state;
-		// 	// 	let iconName;
-		// 	// 	if (routeName === "Home") {
-		// 	// 		iconName = `ios-information-circle${focused ? "" : "-outline"}`;
-		// 	// 	} else if (routeName === "Settings") {
-		// 	// 		iconName = `ios-options${focused ? "" : "-outline"}`;
-		// 	// 	}
-
-		// 	// 	// You can return any component that you like here! We usually use an
-		// 	// 	// icon component from react-native-vector-icons
-		// 	// 	return <Icon name="rocket" size={30} color="#900" />;
-		// }),
 		initialRouteName: "Home",
 		tabBarComponent: TabBarBottom,
-		tabBarPosition: "bottom"
+		tabBarPosition: "bottom",
+		tabBarOptions: {
+			activeTintColor: "skyblue",
+			inactiveTintColor: "lightgrey",
+			labelStyle: {
+				fontSize: 9
+			},
+			style: {
+				backgroundColor: "black"
+			}
+		}
 	}
 );
 
+//Navigation exporté dans TripProject
 export const Navigation = SwitchNavigator(
 	{
 		Modal: ModalMessageBoxComponent,

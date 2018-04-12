@@ -66,67 +66,57 @@ export default class SignUpScreen extends Component {
 
 	//Fonction appelée lorsque l'utilisateur souhaite modifier ou créer un compte
 	signUpOrUpdate = () => {
-		if (this.state.login !== "" && this.state.password !== "") {
-			//Variables nécessaires pour le message de feedback
-			let type = "";
-			let title = "";
-			let text = "";
-			//Cas de l'inscription
-			if (this.state.pageTitle === "Inscription") {
-				try {
-					addUser(
-						this.state.login,
-						this.state.password,
-						this.state.lastName,
-						this.state.firstName,
-						this.state.currency
-					);
-					type = "success";
-					title = "Inscription réussie";
-					text = 'Vous pouvez désormais vous connecter avec le login : "' + this.state.login + '"';
-				} catch (error) {
-					//Échec de l'insertion
-					type = "error";
-					title = "Échec de l'inscription";
-					text = "Oups... un problème s'est produit";
-				}
-				//Redirection vers la page de connexion avec un message d'erreur ou de succès
-				this.props.navigation.navigate("SignIn", {
-					withFeedback: true,
-					type: type,
-					title: title,
-					text: text
-				});
+		//Variables nécessaires pour le message de feedback
+		let type = "";
+		let title = "";
+		let text = "";
+		//Cas de l'inscription
+		if (this.state.pageTitle === "Inscription") {
+			try {
+				addUser(this.state.login, this.state.password, this.state.lastName, this.state.firstName, this.state.currency);
+				type = "success";
+				title = "Inscription réussie";
+				text = 'Vous pouvez désormais vous connecter avec le login : "' + this.state.login + '"';
+			} catch (error) {
+				//Échec de l'insertion : login déjà pris, champs obligatoires non remplis, ...
+				type = "error";
+				title = "Échec de l'inscription";
+				text = error.message;
 			}
-			//Cas de la modification
-			if (this.state.pageTitle === "Modification") {
-				try {
-					updateUser(
-						this.state.user,
-						this.state.login,
-						this.state.password,
-						this.state.lastName,
-						this.state.firstName,
-						this.state.currency
-					);
-					type = "success";
-					title = "Succès";
-					text = "La modification de votre compte a été effectué avec succès";
-				} catch (error) {
-					type = "error";
-					title = "Échec de la modification";
-					text = "Oups... un problème s'est produit";
-				}
-				this.props.navigation.navigate("Account", {
-					withFeedback: true,
-					type: type,
-					title: title,
-					text: text
-				});
+		}
+		//Cas de la modification
+		if (this.state.pageTitle === "Modification") {
+			try {
+				updateUser(
+					this.state.user,
+					this.state.login,
+					this.state.password,
+					this.state.lastName,
+					this.state.firstName,
+					this.state.currency
+				);
+				type = "success";
+				title = "Succès";
+				text = "La modification de votre compte a été effectué avec succès";
+			} catch (error) {
+				//Échec de la modification : même raison que pour l'inscription
+				type = "error";
+				title = "Échec de la modification";
+				text = error.message;
 			}
+		}
+		//En cas d'erreur pas de redirection
+		if (type === "error") {
+			this.writeFeedback(type, title, text);
 		} else {
-			const title = this.state.pageTitle === "Inscription" ? "Ajout impossible" : "Modification impossible";
-			this.writeFeedback("error", title, "Les champs obligatoires n'ont pas tous été remplis");
+			//Si succès redirection vers la page de connexion ou account
+			const nextScreen = this.state.pageTitle === "Inscription" ? "SignIn" : "Account";
+			this.props.navigation.navigate(nextScreen, {
+				withFeedback: true,
+				type: type,
+				title: title,
+				text: text
+			});
 		}
 	};
 
@@ -140,6 +130,7 @@ export default class SignUpScreen extends Component {
 			<View style={{ flex: 1 }}>
 				<NavBarComponent title={this.state.pageTitle} backButton={true} />
 				<ScrollView style={{ flex: 1 }}>
+					{/* TextInput pour login */}
 					<View>
 						<Divider styleName="section-header custom-divider">
 							<Caption>Choisissez un identifiant</Caption>
@@ -159,7 +150,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
-
+					{/* TextInput pour nom */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
 							<Caption>Entrez votre nom (facultatif)</Caption>
@@ -179,7 +170,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
-
+					{/* TextInput pour prénom */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
 							<Caption>Entrez votre prénom (facultatif)</Caption>
@@ -199,7 +190,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
-
+					{/* TextInput pour mot de passe */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
 							<Caption>Choisissez un mot de passe</Caption>
@@ -219,7 +210,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
-
+					{/* Picker pour monnaie de l'utilisateur */}
 					<View style={{ marginTop: 25, alignItems: "center" }}>
 						<Divider styleName="section-header custom-divider">
 							<Caption>Sélectionnez la devise que vous préférez</Caption>
@@ -246,7 +237,7 @@ export default class SignUpScreen extends Component {
 							</Picker>
 						</View>
 					</View>
-
+					{/* Bouton inscription */}
 					<View style={{ marginTop: 35, marginBottom: 20, alignItems: "center" }}>
 						<Button
 							styleName="connect"
@@ -254,15 +245,17 @@ export default class SignUpScreen extends Component {
 								this.signUpOrUpdate();
 							}}
 						>
-							<Text>S'inscrire</Text>
+							<Text>{this.state.pageTitle === "Inscription" ? "S'inscrire" : "Modifier"}</Text>
 							<Icon name="checkbox-on" />
 						</Button>
 					</View>
 				</ScrollView>
+				{/* Composant permettant l'affichage des messages d'erreurs ou de succès */}
 				<DropdownAlert
 					ref={ref => {
 						this.dropdown = ref;
 					}}
+					successImageSrc={require("../Images/checked.png")}
 					closeInterval={5000}
 					updateStatusBar={false}
 					defaultContainer={{

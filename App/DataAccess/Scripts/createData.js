@@ -22,12 +22,12 @@ export const createData = async () => {
 	const washington = addTown("Washington", usa);
 	const newyork = addTown("New York", usa);
 
-	const user = addUser("vicID", "vicPWD", "Domecq", "Victor", france);
+	const user = addUser("vicID", "vicPWD", "Domecq", "Victor", euro);
 
-	washingtonTrip = addLegOfTrip(new Date(2018, 1, 15), new Date(2018, 1, 18), washington, "lowBudget");
-	newyorkTrip = addLegOfTrip(new Date(2018, 1, 18), new Date(2018, 1, 21), newyork, "mediumBudget");
+	washingtonTrip = addLegOfTrip(new Date(2018, 8, 15), new Date(2018, 8, 18), washington, "lowBudget");
+	newyorkTrip = addLegOfTrip(new Date(2018, 8, 18), new Date(2018, 8, 21), newyork, "mediumBudget");
 
-	addTrip(user, [washingtonTrip, newyorkTrip]);
+	addTrip(user, "États-unis", [washingtonTrip, newyorkTrip]);
 
 	addExpenditure(washingtonTrip.budget, "Transport", 5);
 	addExpenditure(washingtonTrip.budget, "Food", 3, new Date(), "Hamburger");

@@ -13,6 +13,7 @@ export const userSchema = {
 export const tripSchema = {
 	name: "Trip",
 	properties: {
+		title: "string",
 		dateOfArrival: "date",
 		dateOfDeparture: "date",
 		legsOfTrip: { type: "list", objectType: "LegOfTrip" }
