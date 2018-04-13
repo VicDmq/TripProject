@@ -1,6 +1,6 @@
 //Api utilisée pour la gestion des devises
 const accessKey = "671ff47a2641f604431c12e81efde1a3AA";
-import { defaultRatesWithEuroBase, defaultSymbols } from "./FixerDefault";
+import { defaultRatesWithEuroBase, defaultCodes } from "./FixerDefault";
 
 export const getRatesFromEuro = async () => {
 	//Une seule requête gratuite : liste des valeurs des monnaies par rapport à l'euro
@@ -22,7 +22,7 @@ export const getRatesFromEuro = async () => {
 	}
 };
 
-export const getSymbols = async () => {
+export const getCodes = async () => {
 	//Une seule requête gratuite : liste des symboles associés au nom des monnaies
 	const url = "http://data.fixer.io/api/symbols?access_key=" + accessKey;
 	try {
@@ -34,9 +34,9 @@ export const getSymbols = async () => {
 			//Si nombre de requêtes dépassées (1000)
 			//Ou ne fonctionnera pas sur Iphone car fetch ne fonctionne qu'avec HTTPS (version payante nécessaire)
 			//Pour palier à ce problème, j'envois un fichier avec des valeurs standards
-			return defaultSymbols.symbols;
+			return defaultCodes.symbols;
 		}
 	} catch (error) {
-		return defaultSymbols.symbols;
+		return defaultCodes.symbols;
 	}
 };

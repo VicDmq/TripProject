@@ -24,16 +24,26 @@ export const addUser = (login, password, lastName, firstName, currency) => {
 	//Nécessaire de retourner un utilisateur
 };
 
-export const updateUser = (user, newLogin, newPassword, newLastName, newFirstName, newCurrency) => {
+export const updateUser = (user, isSameLogin, newLogin, newPassword, newLastName, newFirstName, newCurrency) => {
 	//Même chose que pour l'ajout
-	checkIfLoginAlreadyExist(login);
-	checkRequiredFields(login, password);
+	if (!isSameLogin) {
+		checkIfLoginAlreadyExist(newLogin);
+	}
+	checkRequiredFields(newLogin, newPassword);
+
+	//On teste si le mot de passe est toujours le même
+	const isSamePassword = user.password === newPassword;
 
 	updateObjectProperty(user, "login", newLogin);
 	updateObjectProperty(user, "password", newPassword);
 	updateObjectProperty(user, "lastName", newLastName);
 	updateObjectProperty(user, "firstName", newFirstName);
 	updateObjectProperty(user, "currency", newCurrency);
+
+	if (!isSameLogin || !isSamePassword) {
+		removeConnectedUser();
+		setConnectedUserTokens(user);
+	}
 };
 
 //Retourne une erreur si le login existe déjà

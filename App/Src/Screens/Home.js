@@ -56,10 +56,6 @@ export default class HomeScreen extends Component {
 		return trip;
 	};
 
-	// componentDidUpdate() {
-	// this.setCurrentOrNextTrip();
-	// }
-
 	render() {
 		if (this.state.userTokens === undefined) {
 			return <SpinnerComponent />;
@@ -73,15 +69,16 @@ export default class HomeScreen extends Component {
 
 					<ImageBackground styleName={"image-home"} source={require("../Images/map.jpg")}>
 						{this.state.tripInformation !== undefined ? (
-							<Overlay styleName="image-overlay custom">
+							<Overlay styleName="image-overlay start">
 								<Title>{this.state.tripInformation.title}</Title>
 								<Subtitle styleName="legs-of-trips">{this.state.tripInformation.legsOfTrip}</Subtitle>
 								<Subtitle styleName="period">
 									Du {this.state.tripInformation.dateOfArrival} au {this.state.tripInformation.dateOfDeparture}
 								</Subtitle>
 								<Text styleName={"value"} style={{ marginTop: 45 }}>
-									{this.state.tripInformation.totalBudget.totalBudgetSpent} € /{" "}
-									{this.state.tripInformation.totalBudget.totalBudgetPlanned} €
+									{this.state.tripInformation.totalBudget.totalBudgetSpent} {this.state.tripInformation.currencySymbol}{" "}
+									/ {this.state.tripInformation.totalBudget.totalBudgetPlanned}{" "}
+									{this.state.tripInformation.currencySymbol}
 								</Text>
 								<Text styleName={"legend"}>(Budget dépensé / Budget plannifié)</Text>
 								{this.state.tripPeriod === "coming" ? (
@@ -107,7 +104,17 @@ export default class HomeScreen extends Component {
 									</Button>
 								)}
 							</Overlay>
-						) : null}
+						) : (
+							<Overlay styleName="image-overlay center">
+								<Button>
+									<Text style={{ marginRight: 20 }}>Ajouter un voyage</Text>
+									<EntypoIcon name="circle-with-plus" color="white" size={25} />
+								</Button>
+								<Text style={{ marginTop: 5 }} styleName={"legend"}>
+									Vous ne le regretterez pas ! ;-)
+								</Text>
+							</Overlay>
+						)}
 					</ImageBackground>
 				</View>
 			);

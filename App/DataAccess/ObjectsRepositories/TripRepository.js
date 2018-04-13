@@ -114,7 +114,6 @@ export const findNextOrCurrentTrip = user => {
 	}
 
 	if (nextOrCurrentTrip !== undefined) {
-		console.log(user.currency);
 		return {
 			information: setTripInformationInJSON(nextOrCurrentTrip, user.currency),
 			period: comingOrNow
@@ -153,6 +152,7 @@ const setTripInformationInJSON = (trip, userCurrency) => {
 		legsOfTrip: legsOfTripTownToString.substring(0, legsOfTripTownToString.length - 3),
 		dateOfArrival: getDateToString(trip.dateOfArrival),
 		dateOfDeparture: getDateToString(trip.dateOfDeparture),
-		totalBudget: totalBudget
+		totalBudget: totalBudget,
+		currencySymbol: userCurrency.symbol
 	};
 };

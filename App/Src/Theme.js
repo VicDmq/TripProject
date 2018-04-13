@@ -1,10 +1,5 @@
 import { getTheme } from "@shoutem/ui";
 import { _ } from "lodash";
-
-//On exporte le theme
-//On utilise merge (lodash) : permet de merge le thème original fourni par Shoutem ui et celui ci-dessus
-export const theme = _.merge(getTheme(), customTheme);
-
 //Fichier utilisé pour établir le thème des composants shoutem : évite de surcharger les composants
 const customTheme = {
 	"shoutem.ui.View": {
@@ -43,6 +38,12 @@ const customTheme = {
 			height: 40,
 			width: 150
 		},
+		".rounded-button": {
+			backgroundColor: "black",
+			height: 55,
+			width: 55,
+			borderRadius: 50
+		},
 		"shoutem.ui.Text": {
 			color: "white",
 			fontSize: 12
@@ -69,16 +70,34 @@ const customTheme = {
 			backgroundColor: "black",
 			marginBottom: 5,
 			borderColor: "black"
+		},
+		".label-value-divider": {
+			backgroundColor: "white",
+			borderBottomColor: "lightgrey",
+			borderTopWidth: 0,
+			borderBottomWidth: 2,
+			paddingBottom: 3,
+			width: 280,
+			"shoutem.ui.Text": {
+				".left-component": {
+					marginLeft: 10,
+					fontSize: 16
+				},
+				".right-component": {
+					marginRight: 10,
+					fontWeight: "bold",
+					fontSize: 16
+				}
+			}
 		}
 	},
 	"shoutem.ui.ImageBackground": {
 		".image-home": {
 			flex: 1,
-			"shoutem.ui.Overlay.custom": {
+			"shoutem.ui.Overlay": {
 				flex: 0.8,
 				width: 380,
 				paddingTop: 20,
-				justifyContent: "flex-start",
 				"shoutem.ui.Title": {
 					fontWeight: "bold",
 					fontSize: 35,
@@ -89,8 +108,7 @@ const customTheme = {
 						fontSize: 15
 					},
 					".period": {
-						fontSize: 11,
-						fontWeight: "Italic"
+						fontSize: 11
 					}
 				},
 				"shoutem.ui.Text": {
@@ -112,8 +130,18 @@ const customTheme = {
 						fontWeight: "bold",
 						fontSize: 14
 					}
+				},
+				".center": {
+					justifyContent: "center"
+				},
+				".start": {
+					justifyContent: "flex-start"
 				}
 			}
 		}
 	}
 };
+
+//On exporte le theme
+//On utilise merge (lodash) : permet de merge le thème original fourni par Shoutem ui et celui ci-dessus
+export const theme = _.merge(getTheme(), customTheme);

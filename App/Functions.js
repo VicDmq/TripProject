@@ -1,10 +1,14 @@
 //Convertit le prix dans la monnaie de l'utilisateur
 export const convertToUserCurrency = (priceToConvert, userCurrency, otherCurrency) => {
-	const priceInEuro = convertToEuro(priceToConvert, otherCurrency);
-	if (userCurrency.name === "Euro") {
-		return roundTo2Decimals(priceInEuro);
+	if (userCurrency === otherCurrency) {
+		return priceToConvert;
 	} else {
-		return roundTo2Decimals(priceInEuro * userCurrency.valueAgainstOneEuro);
+		const priceInEuro = convertToEuro(priceToConvert, otherCurrency);
+		if (userCurrency.name === "Euro") {
+			return roundTo2Decimals(priceInEuro);
+		} else {
+			return roundTo2Decimals(priceInEuro * userCurrency.valueAgainstOneEuro);
+		}
 	}
 };
 

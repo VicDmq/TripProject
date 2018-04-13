@@ -1,6 +1,6 @@
 //Fichier contenant les valeurs par defaut à renvoyer lorsque l'api ne fonctionne pas
 
-export const defaultSymbols = {
+export const defaultCodes = {
 	symbols: {
 		AED: "United Arab Emirates Dirham",
 		AFN: "Afghan Afghani",

@@ -108,6 +108,7 @@ export const currencySchema = {
 	name: "Currency",
 	properties: {
 		name: "string",
+		code: "string",
 		symbol: "string",
 		valueAgainstOneEuro: { type: "double", default: 1 }
 	}

@@ -31,6 +31,19 @@ const AuthStack = StackNavigator(
 	}
 );
 
+const AccountStack = StackNavigator(
+	{
+		Account: { screen: UserAccountScreen },
+		UpdateAccount: { screen: SignUpScreen }
+	},
+	{
+		navigationOptions: {
+			header: null
+		},
+		initialRouteName: "Account"
+	}
+);
+
 //TabNavigator utilisé une fois que l'utilisateur est connecté : navigation au sein de l'app
 //C'est ici que la tabbar est stylisé
 const AppTab = TabNavigator(
@@ -62,8 +75,8 @@ const AppTab = TabNavigator(
 				}
 			}
 		},
-		Account: {
-			screen: UserAccountScreen,
+		AccountStack: {
+			screen: AccountStack,
 			navigationOptions: {
 				tabBarLabel: "Compte",
 				tabBarIcon: ({ focused, tintColor }) => {

@@ -13,8 +13,8 @@ export const createData = async () => {
 
 	await updateCurrenciesFromApi(); //Création des monnaies
 
-	const euro = getObjectsFiltered("Currency", "symbol='EUR'")[0];
-	const dollar = getObjectsFiltered("Currency", "symbol='USD'")[0];
+	const euro = getObjectsFiltered("Currency", "code='EUR'")[0];
+	const dollar = getObjectsFiltered("Currency", "code='USD'")[0];
 
 	const france = addCountry("France", euro);
 	const usa = addCountry("USA", dollar);

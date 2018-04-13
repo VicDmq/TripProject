@@ -10,7 +10,8 @@ import NavBarComponent from "../Components/NavBar";
 
 //Fonctions back-end
 import { getObjects, getObjectsFiltered } from "../../DataAccess/Scripts/Requests";
-import { addUser, updateUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
+import { addUser, updateUser, getConnectedUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
+import { getCurrencyByCode } from "../../DataAccess/ObjectsRepositories/CurrencyRepository";
 
 //Écran d'inscription mais aussi de modification du compte
 export default class SignUpScreen extends Component {
@@ -18,37 +19,39 @@ export default class SignUpScreen extends Component {
 		super(props);
 		this.state = {
 			pageTitle: "Inscription",
-			user: undefined,
+			userTokens: undefined,
 			login: "",
 			lastName: "",
 			firstName: "",
 			password: "",
-			currency: getObjects("Currency")[0],
-			currencies: this.getCurrenciesForPicker()
+			currencyCode: getObjects("Currency")[0].code,
+			currencies: this.getCurrenciesForPicker(),
+			componentDidMount: false
 		};
+	}
+
+	UNSAFE_componentWillMount() {
 		this.updateStateFromProps();
 	}
 
 	//Permet de remplir directement les champs dans le cas où il s'agit de la page de modification
-	updateStateFromProps = () => {
+	updateStateFromProps = async () => {
 		//Si false ==> alors c'est bien la page de modification des informations du compte
 		const isSignUpScreen = this.props.navigation.getParam("isSignUpScreen", true);
 		if (isSignUpScreen === false) {
 			//Paramètres envoyés depuis la page d'appel
 			const { params } = this.props.navigation.state;
-
 			//On a besoin de récupérer l'utilisateur pour ensuite le mettre à jour
-			const request = "login ='" + params.login + "' AND password='" + params.password + "'";
-			const user = getObjectsFiltered("User", request)[0];
-
+			const userTokens = params.userTokens;
+			const userInformations = params.userInformations;
 			this.setState({
 				pageTitle: "Modification",
-				user: user,
-				login: user.login,
-				lastName: user.lastName,
-				firstName: user.firstName,
-				password: user.password,
-				currency: user.currency
+				userTokens: userTokens,
+				login: userInformations.login,
+				lastName: userInformations.lastName,
+				firstName: userInformations.firstName,
+				password: userInformations.password,
+				currencyCode: userInformations.currencyCode
 			});
 		}
 	};
@@ -57,9 +60,11 @@ export default class SignUpScreen extends Component {
 	getCurrenciesForPicker = () => {
 		let pickerItems = [];
 		//Retourne tous les objets stockés du type demandé (exemple : Currency ou Country)
-		const items = getObjects("Currency");
-		items.forEach(item => {
-			pickerItems.push(<Picker.Item label={item.name} value={item} />);
+		const currencies = getObjects("Currency");
+		currencies.forEach(currency => {
+			pickerItems.push(
+				<Picker.Item key={currency.code} label={currency.name + " (" + currency.symbol + ")"} value={currency.code} />
+			);
 		});
 		return pickerItems;
 	};
@@ -73,7 +78,13 @@ export default class SignUpScreen extends Component {
 		//Cas de l'inscription
 		if (this.state.pageTitle === "Inscription") {
 			try {
-				addUser(this.state.login, this.state.password, this.state.lastName, this.state.firstName, this.state.currency);
+				addUser(
+					this.state.login,
+					this.state.password,
+					this.state.lastName,
+					this.state.firstName,
+					getCurrencyByCode(this.state.currencyCode)
+				);
 				type = "success";
 				title = "Inscription réussie";
 				text = 'Vous pouvez désormais vous connecter avec le login : "' + this.state.login + '"';
@@ -87,13 +98,15 @@ export default class SignUpScreen extends Component {
 		//Cas de la modification
 		if (this.state.pageTitle === "Modification") {
 			try {
+				const user = getConnectedUser(this.state.userTokens.login, this.state.userTokens.password);
 				updateUser(
-					this.state.user,
+					user,
+					user.login === this.state.login,
 					this.state.login,
 					this.state.password,
 					this.state.lastName,
 					this.state.firstName,
-					this.state.currency
+					getCurrencyByCode(this.state.currencyCode)
 				);
 				type = "success";
 				title = "Succès";
@@ -230,8 +243,8 @@ export default class SignUpScreen extends Component {
 								style={{
 									flex: 1
 								}}
-								selectedValue={this.state.currency}
-								onValueChange={(itemValue, itemIndex) => this.setState({ currency: itemValue })}
+								selectedValue={this.state.currencyCode}
+								onValueChange={(itemValue, itemIndex) => this.setState({ currencyCode: itemValue })}
 							>
 								{this.state.currencies}
 							</Picker>
