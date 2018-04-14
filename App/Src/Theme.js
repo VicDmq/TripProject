@@ -86,7 +86,9 @@ const customTheme = {
 				".right-component": {
 					marginRight: 10,
 					fontWeight: "bold",
-					fontSize: 16
+					fontSize: 16,
+					width: 150,
+					textAlign: "right"
 				}
 			}
 		}

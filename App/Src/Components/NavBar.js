@@ -15,7 +15,11 @@ export default class NavBarComponent extends Component {
 				<NavigationBar
 					styleName="clear"
 					leftComponent={this.props.backButton ? <BackButtonComponent /> : null}
-					centerComponent={<Heading styleName="bold h-center">{this.props.title}</Heading>}
+					centerComponent={
+						<Heading styleName="bold h-center" style={{ width: 250 }}>
+							{this.props.title}
+						</Heading>
+					}
 					rightComponent={this.props.logoutButton ? <LogOutButtonComponent /> : null}
 				/>
 			</ImageBackground>

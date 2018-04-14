@@ -2,11 +2,10 @@
 import React, { Component } from "react";
 import { Picker, ScrollView } from "react-native";
 import { View, Text, TextInput, Caption, Icon, Divider, Button } from "@shoutem/ui";
-//Module permettant d'afficher des messages suite aux actions de l'utilisateur
-import DropdownAlert from "react-native-dropdownalert";
 
 //Composants customisés
 import NavBarComponent from "../Components/NavBar";
+import DropdownAlertComponent from "../Components/DropdownAlert";
 
 //Fonctions back-end
 import { getObjects, getObjectsFiltered } from "../../DataAccess/Scripts/Requests";
@@ -17,25 +16,12 @@ import { getCurrencyByCode } from "../../DataAccess/ObjectsRepositories/Currency
 export default class SignUpScreen extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			pageTitle: "Inscription",
-			userTokens: undefined,
-			login: "",
-			lastName: "",
-			firstName: "",
-			password: "",
-			currencyCode: getObjects("Currency")[0].code,
-			currencies: this.getCurrenciesForPicker(),
-			componentDidMount: false
-		};
+		this.state = this.updateStateFromProps();
 	}
 
-	UNSAFE_componentWillMount() {
-		this.updateStateFromProps();
-	}
-
-	//Permet de remplir directement les champs dans le cas où il s'agit de la page de modification
-	updateStateFromProps = async () => {
+	//Cette fonction a pour rôle de définir le state initial suivant s'il s'agit de la page
+	//d'inscription ou de modification
+	updateStateFromProps = () => {
 		//Si false ==> alors c'est bien la page de modification des informations du compte
 		const isSignUpScreen = this.props.navigation.getParam("isSignUpScreen", true);
 		if (isSignUpScreen === false) {
@@ -44,15 +30,30 @@ export default class SignUpScreen extends Component {
 			//On a besoin de récupérer l'utilisateur pour ensuite le mettre à jour
 			const userTokens = params.userTokens;
 			const userInformations = params.userInformations;
-			this.setState({
+			return {
 				pageTitle: "Modification",
 				userTokens: userTokens,
 				login: userInformations.login,
 				lastName: userInformations.lastName,
 				firstName: userInformations.firstName,
 				password: userInformations.password,
-				currencyCode: userInformations.currencyCode
-			});
+				currencyCode: userInformations.currencyCode,
+				currencies: this.getCurrenciesForPicker(),
+				feedback: undefined
+			};
+			//Page d'inscription
+		} else {
+			return {
+				pageTitle: "Inscription",
+				userTokens: undefined,
+				login: "",
+				lastName: "",
+				firstName: "",
+				password: "",
+				currencyCode: getObjects("Currency")[0].code,
+				currencies: this.getCurrenciesForPicker(),
+				feedback: undefined
+			};
 		}
 	};
 
@@ -120,7 +121,7 @@ export default class SignUpScreen extends Component {
 		}
 		//En cas d'erreur pas de redirection
 		if (type === "error") {
-			this.writeFeedback(type, title, text);
+			this.setState({ feedback: { type: type, title: title, text: text } });
 		} else {
 			//Si succès redirection vers la page de connexion ou account
 			const nextScreen = this.state.pageTitle === "Inscription" ? "SignIn" : "Account";
@@ -131,11 +132,6 @@ export default class SignUpScreen extends Component {
 				text: text
 			});
 		}
-	};
-
-	//Affichage d'un message
-	writeFeedback = (type, title, text) => {
-		this.dropdown.alertWithType(type, title, text);
 	};
 
 	render() {
@@ -154,7 +150,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.login}
 								placeholder={"Exemple : login"}
-								onChangeText={login => this.setState({ login: login })}
+								onChangeText={login => this.setState({ login: login, feedback: undefined })}
 							/>
 							{this.state.login !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -163,6 +159,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
+
 					{/* TextInput pour nom */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
@@ -174,7 +171,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.lastName}
 								placeholder={"Exemple : Contador"}
-								onChangeText={lastName => this.setState({ lastName: lastName })}
+								onChangeText={lastName => this.setState({ lastName: lastName, feedback: undefined })}
 							/>
 							{this.state.lastName !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -183,6 +180,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
+
 					{/* TextInput pour prénom */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
@@ -194,7 +192,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.firstName}
 								placeholder={"Exemple : Alberto"}
-								onChangeText={firstName => this.setState({ firstName: firstName })}
+								onChangeText={firstName => this.setState({ firstName: firstName, feedback: undefined })}
 							/>
 							{this.state.firstName !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -203,6 +201,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
+
 					{/* TextInput pour mot de passe */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
@@ -214,7 +213,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.password}
 								placeholder={"Exemple : *Mdp19Fort/"}
-								onChangeText={password => this.setState({ password: password })}
+								onChangeText={password => this.setState({ password: password, feedback: undefined })}
 							/>
 							{this.state.password !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -223,6 +222,7 @@ export default class SignUpScreen extends Component {
 							)}
 						</View>
 					</View>
+
 					{/* Picker pour monnaie de l'utilisateur */}
 					<View style={{ marginTop: 25, alignItems: "center" }}>
 						<Divider styleName="section-header custom-divider">
@@ -244,12 +244,15 @@ export default class SignUpScreen extends Component {
 									flex: 1
 								}}
 								selectedValue={this.state.currencyCode}
-								onValueChange={(itemValue, itemIndex) => this.setState({ currencyCode: itemValue })}
+								onValueChange={(itemValue, itemIndex) =>
+									this.setState({ currencyCode: itemValue, feedback: undefined })
+								}
 							>
 								{this.state.currencies}
 							</Picker>
 						</View>
 					</View>
+
 					{/* Bouton inscription */}
 					<View style={{ marginTop: 35, marginBottom: 20, alignItems: "center" }}>
 						<Button
@@ -264,22 +267,7 @@ export default class SignUpScreen extends Component {
 					</View>
 				</ScrollView>
 				{/* Composant permettant l'affichage des messages d'erreurs ou de succès */}
-				<DropdownAlert
-					ref={ref => {
-						this.dropdown = ref;
-					}}
-					successImageSrc={require("../Images/checked.png")}
-					closeInterval={5000}
-					updateStatusBar={false}
-					defaultContainer={{
-						marginLeft: 8,
-						marginRight: 8,
-						marginTop: 8,
-						padding: 8,
-						flexDirection: "row",
-						borderRadius: 50
-					}}
-				/>
+				<DropdownAlertComponent feedbackProps={this.state.feedback} />
 			</View>
 		);
 	}

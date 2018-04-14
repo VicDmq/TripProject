@@ -6,6 +6,7 @@ import DropdownAlert from "react-native-dropdownalert";
 
 //Composants customisés
 import NavBarComponent from "../Components/NavBar";
+import DropdownAlertComponent from "../Components/DropdownAlert";
 
 //Fonctions back-end
 import { getObjectsFiltered } from "../../DataAccess/Scripts/Requests";
@@ -17,7 +18,8 @@ export default class SignInScreen extends Component {
 		super(props);
 		this.state = {
 			login: "",
-			password: ""
+			password: "",
+			feedback: this.checkIfFeedback()
 		};
 	}
 
@@ -32,8 +34,10 @@ export default class SignInScreen extends Component {
 			this.props.navigation.navigate("App");
 		} else {
 			//Affichage d'un message d'erreur
-			this.writeFeedback("error", "Erreur", "Identifiant ou mot de passe incorrect");
-			this.setState({ password: "" });
+			this.setState({
+				feedback: { type: "error", title: "Erreur", text: "Identifiant ou mot de passe incorrect" },
+				password: ""
+			});
 		}
 	};
 
@@ -44,15 +48,8 @@ export default class SignInScreen extends Component {
 		const withFeedback = this.props.navigation.getParam("withFeedback", false);
 		if (withFeedback === true) {
 			const { params } = this.props.navigation.state;
-			this.writeFeedback(params.type, params.title, params.text);
-			//Permet de n'afficher le message qu'une seule fois
-			this.props.navigation.setParams({ withFeedback: false });
+			return { type: params.type, title: params.title, text: params.text };
 		}
-	};
-
-	//Affichage d'un message
-	writeFeedback = (type, title, text) => {
-		this.dropdown.alertWithType(type, title, text);
 	};
 
 	render() {
@@ -103,23 +100,7 @@ export default class SignInScreen extends Component {
 					</View>
 				</View>
 				{/* Composant permettant d'afficher messages d'erreur et de succès */}
-				<DropdownAlert
-					ref={ref => {
-						this.dropdown = ref;
-						this.checkIfFeedback();
-					}}
-					successImageSrc={require("../Images/checked.png")}
-					closeInterval={5000}
-					updateStatusBar={false}
-					defaultContainer={{
-						marginLeft: 8,
-						marginRight: 8,
-						marginTop: 8,
-						padding: 8,
-						flexDirection: "row",
-						borderRadius: 50
-					}}
-				/>
+				<DropdownAlertComponent feedbackProps={this.state.feedback} />
 			</View>
 		);
 	}

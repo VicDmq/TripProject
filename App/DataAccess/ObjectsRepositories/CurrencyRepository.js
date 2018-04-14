@@ -70,6 +70,7 @@ export const updateCurrencySymbol = (currency, newSymbol) => {
 	updateObjectProperty(currency, "symbol", newSymbol);
 };
 
+//Permet d'avoir une monnaie en fonction du code mis en paramètre
 export const getCurrencyByCode = code => {
 	const request = "code='" + code + "'";
 	return getObjectsFiltered("Currency", request)[0];
