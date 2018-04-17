@@ -38,7 +38,8 @@ export default class UserAccountScreen extends Component {
 				lastName: user.lastName,
 				password: user.password,
 				//On ne stocke que le code de la monnaie
-				currencyCode: user.currency.code
+				currencyCode: user.currency.code,
+				disableTouch: false
 			}
 		});
 	};
@@ -54,9 +55,23 @@ export default class UserAccountScreen extends Component {
 		//Vaut withFeedback si défini et false sinon
 		const withFeedback = this.props.navigation.getParam("withFeedback", false);
 		if (withFeedback === true) {
+			setTimeout(() => {
+				this.setState({
+					feedback: undefined
+				});
+			}, 2000);
 			const { params } = this.props.navigation.state;
 			return { type: params.type, title: params.title, text: params.text };
 		}
+	};
+
+	disableTouch = () => {
+		this.setState({ disableTouch: true });
+		setTimeout(() => {
+			this.setState({
+				disableTouch: false
+			});
+		}, 2000);
 	};
 
 	render() {
@@ -93,9 +108,11 @@ export default class UserAccountScreen extends Component {
 							</View>
 
 							<Button
+								disabled={this.state.disableTouch}
 								styleName="rounded-button"
 								style={{ marginTop: 20, marginBottom: 15 }}
 								onPress={() => {
+									this.disableTouch();
 									this.props.navigation.navigate("UpdateAccount", {
 										isSignUpScreen: false,
 										userTokens: this.state.userTokens,

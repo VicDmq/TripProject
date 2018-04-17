@@ -19,7 +19,8 @@ export default class SignInScreen extends Component {
 		this.state = {
 			login: "",
 			password: "",
-			feedback: this.checkIfFeedback()
+			feedback: this.checkIfFeedback(),
+			disableTouch: false
 		};
 	}
 
@@ -38,6 +39,11 @@ export default class SignInScreen extends Component {
 				feedback: { type: "error", title: "Erreur", text: "Identifiant ou mot de passe incorrect" },
 				password: ""
 			});
+			setTimeout(() => {
+				this.setState({
+					feedback: undefined
+				});
+			}, 2000);
 		}
 	};
 
@@ -48,8 +54,22 @@ export default class SignInScreen extends Component {
 		const withFeedback = this.props.navigation.getParam("withFeedback", false);
 		if (withFeedback === true) {
 			const { params } = this.props.navigation.state;
+			setTimeout(() => {
+				this.setState({
+					feedback: undefined
+				});
+			}, 2000);
 			return { type: params.type, title: params.title, text: params.text };
 		}
+	};
+
+	disableTouch = () => {
+		this.setState({ disableTouch: true });
+		setTimeout(() => {
+			this.setState({
+				disableTouch: false
+			});
+		}, 2000);
 	};
 
 	render() {
@@ -85,15 +105,26 @@ export default class SignInScreen extends Component {
 					{/* Boutons pour connexion et ajout de compte */}
 					<View styleName="horizontal h-center" style={{ marginTop: 20 }}>
 						<Button
+							disabled={this.state.disableTouch}
 							styleName="create-account"
 							style={{ marginRight: 10 }}
-							onPress={() => this.props.navigation.navigate("SignUp")}
+							onPress={() => {
+								this.disableTouch();
+								this.props.navigation.navigate("SignUp");
+							}}
 						>
 							<Text>Nouveau compte</Text>
 							<Icon name="add-friend" />
 						</Button>
 
-						<Button styleName="connect" onPress={() => this.logIn()}>
+						<Button
+							disabled={this.state.disableTouch}
+							styleName="connect"
+							onPress={() => {
+								this.disableTouch();
+								this.logIn();
+							}}
+						>
 							<Text>Connexion</Text>
 							<Icon name="checkbox-on" />
 						</Button>

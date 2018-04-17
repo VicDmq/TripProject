@@ -1,7 +1,7 @@
 import { clearDatabase } from "./UpdateDatabase";
 import { updateCurrenciesFromApi } from "../ObjectsRepositories/CurrencyRepository";
 import { getObjectsFiltered, getObjects } from "./Requests";
-import { addCountry } from "../ObjectsRepositories/CountryRepository";
+import { createCountryFromRestCountries } from "../ObjectsRepositories/CountryRepository";
 import { addTown, updateTown } from "../ObjectsRepositories/TownRepository";
 import { addUser } from "../ObjectsRepositories/UserRepository";
 import { addLegOfTrip, addTrip } from "../ObjectsRepositories/TripRepository";
@@ -12,12 +12,16 @@ export const createData = async () => {
 	clearDatabase();
 
 	await updateCurrenciesFromApi(); //Création des monnaies
+	createCountryFromRestCountries();
 
 	const euro = getObjectsFiltered("Currency", "code='EUR'")[0];
 	const dollar = getObjectsFiltered("Currency", "code='USD'")[0];
 
-	const france = addCountry("France", euro);
-	const usa = addCountry("USA", dollar);
+	const france = getObjectsFiltered("Country", "name='France'")[0];
+	const usa = getObjectsFiltered("Country", "name='États-Unis'")[0];
+
+	const paris = addTown("Paris", france);
+	const bordeaux = addTown("Bordeaux", france);
 
 	const washington = addTown("Washington", usa);
 	const newyork = addTown("New York", usa);

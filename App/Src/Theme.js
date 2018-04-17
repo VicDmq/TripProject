@@ -103,7 +103,7 @@ const customTheme = {
 				"shoutem.ui.Title": {
 					fontWeight: "bold",
 					fontSize: 35,
-					lineHeight: 35
+					lineHeight: 40
 				},
 				"shoutem.ui.Subtitle": {
 					".leg-of-trips": {
@@ -138,6 +138,30 @@ const customTheme = {
 				},
 				".start": {
 					justifyContent: "flex-start"
+				}
+			}
+		}
+	},
+	"shoutem.ui.TouchableOpacity": {
+		".custom": {
+			activeOpacity: 0.4,
+			borderBottomColor: "lightgrey",
+			borderBottomWidth: 2,
+			"shoutem.ui.Row": {
+				height: 80,
+				"shoutem.ui.View": {
+					height: 60,
+					justifyContent: "center",
+					"shoutem.ui.Subtitle": {
+						fontSize: 19,
+						lineHeight: 25,
+						fontWeight: "bold",
+						marginBottom: 4
+					},
+					"shoutem.ui.Text": {
+						fontSize: 9,
+						margin: 0
+					}
 				}
 			}
 		}

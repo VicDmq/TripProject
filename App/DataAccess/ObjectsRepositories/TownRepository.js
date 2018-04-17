@@ -1,5 +1,6 @@
 import { createObject, addObjectToPropertyList, updateObjectProperty } from "../Scripts/UpdateDatabase";
 import { updateBudgetForecast } from "./BudgetForecastRepository";
+import { getObjectsFiltered } from "../Scripts/Requests";
 
 export const addTown = (name, country) => {
 	const properties = {
@@ -39,4 +40,17 @@ export const updateTown = town => {
 	updateBudgetForecast(town, "lowBudget");
 	updateBudgetForecast(town, "mediumBudget");
 	updateBudgetForecast(town, "highBudget");
+};
+
+export const getTownByNameAndCountryName = (townName, countryName) => {
+	const request = "name='" + townName + "' AND country.name='" + countryName + "'";
+	const towns = getObjectsFiltered("Town", request);
+
+	if (towns.length === 0) {
+		const request = "name='" + countryName + "'";
+		const country = getObjectsFiltered("Country", request)[0];
+		return addTown(townName, country);
+	} else {
+		return towns[0];
+	}
 };

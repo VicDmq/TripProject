@@ -1,5 +1,5 @@
 import { createObject, addObjectToPropertyList, updateObjectProperty, deleteObject } from "../Scripts/UpdateDatabase";
-import { addBudget } from "./BudgetRepository";
+import { addBudget, updateTypeOfBudget } from "./BudgetRepository";
 import { getDateToString, convertToUserCurrency } from "../../Functions";
 
 //Création d'un voyage d'un utilisateur avec potentiellement plusieurs étapes
@@ -33,23 +33,16 @@ export const addLegOfTrip = (dateOfArrival, dateOfDeparture, town, typeOfBudget)
 };
 
 //Modification d'une étape d'un voyage
-export const updateLegOfTrip = (trip, legOfTrip, dateOfArrival, dateOfDeparture, town) => {
+export const updateLegOfTrip = (trip, legOfTrip, dateOfArrival, dateOfDeparture, town, typeOfBudget) => {
 	updateObjectProperty(legOfTrip, "dateOfArrival", dateOfArrival);
 	updateObjectProperty(legOfTrip, "dateOfDeparture", dateOfDeparture);
 	updateObjectProperty(legOfTrip, "town", town);
-
-	//Mise à jour des dates
-	updateTrip(trip);
+	updateTypeOfBudget(legOfTrip.budget, typeOfBudget);
 };
 
 //Suppression d'une étape du voyage
-export const deleteLegOfTrip = (trip, legOfTrip) => {
+export const deleteLegOfTrip = legOfTrip => {
 	deleteObject(legOfTrip);
-	if (trip.legsOfTrip.length === 0) {
-		deleteObject(trip);
-	} else {
-		updateTrip();
-	}
 };
 
 //Modification du voyage : dates ou ajout d'une ou plusieurs étapes
@@ -59,10 +52,10 @@ export const updateTrip = (trip, newTitle, newLegsOfTrip = []) => {
 			addObjectToPropertyList(trip, "legsOfTrip", newLegsOfTrip[i]);
 		}
 	}
-	updateTrip(trip, "title", newTitle);
+	updateObjectProperty(trip, "title", newTitle);
 	const dates = getDatesOfTrip(trip.legsOfTrip);
 	updateObjectProperty(trip, "dateOfArrival", dates.dateOfArrival);
-	updateObjectProperty(trip, "dateOfDeparture", dates.dateOfArrival);
+	updateObjectProperty(trip, "dateOfDeparture", dates.dateOfDeparture);
 };
 
 //Permet de calculer les dates de début et de fin d'un voyage en fonction des étapes
@@ -101,7 +94,7 @@ export const findNextOrCurrentTrip = user => {
 	while (!returnThisTrip && i < trips.length) {
 		const trip = trips[i];
 
-		if (trip.dateOfArrival - dateOfToday < 0 && trip.dateOfArrival - dateOfToday > 0) {
+		if (trip.dateOfArrival - dateOfToday <= 0 && trip.dateOfDeparture - dateOfToday >= 0) {
 			returnThisTrip = true;
 			nextOrCurrentTrip = trip;
 			comingOrNow = "now";
@@ -150,9 +143,51 @@ const setTripInformationInJSON = (trip, userCurrency) => {
 	return {
 		title: trip.title,
 		legsOfTrip: legsOfTripTownToString.substring(0, legsOfTripTownToString.length - 3),
-		dateOfArrival: getDateToString(trip.dateOfArrival),
-		dateOfDeparture: getDateToString(trip.dateOfDeparture),
+		dateOfArrival: trip.dateOfArrival,
+		dateOfDeparture: trip.dateOfDeparture,
 		totalBudget: totalBudget,
 		currencySymbol: userCurrency.symbol
 	};
+};
+
+//Permet de récupérer le voyage d'un utilisateur suivant son titre, et ses dates
+export const getTrip = (user, title, dateOfArrival, dateOfDeparture) => {
+	return user.trips.find(trip => {
+		return (
+			trip.title === title && trip.dateOfArrival - dateOfArrival === 0 && trip.dateOfDeparture - dateOfDeparture === 0
+		);
+	});
+};
+
+//Permet de récupérer une étape d'un voyage à partir du nom de la ville et de ses dates
+export const getLegOfTrip = (trip, townName, dateOfArrival, dateOfDeparture) => {
+	return trip.legsOfTrip.find(legOfTrip => {
+		return (
+			legOfTrip.town.name === townName &&
+			legOfTrip.dateOfArrival - dateOfArrival === 0 &&
+			legOfTrip.dateOfDeparture - dateOfDeparture === 0
+		);
+	});
+};
+
+export const getLegsOfTripInformation = trip => {
+	const legsOfTrip = [];
+
+	trip.legsOfTrip.forEach(legOfTrip => {
+		legsOfTrip.push({
+			status: "toUpdate",
+			lastStateForAuth: {
+				townName: legOfTrip.town.name,
+				dateOfDeparture: legOfTrip.dateOfDeparture,
+				dateOfArrival: legOfTrip.dateOfArrival
+			},
+			dateOfArrival: legOfTrip.dateOfArrival,
+			dateOfDeparture: legOfTrip.dateOfDeparture,
+			countryName: legOfTrip.town.country.name,
+			townName: legOfTrip.town.name,
+			typeOfBudget: legOfTrip.budget.typeOfBudget
+		});
+	});
+
+	return legsOfTrip;
 };

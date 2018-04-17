@@ -39,7 +39,8 @@ export default class SignUpScreen extends Component {
 				password: userInformations.password,
 				currencyCode: userInformations.currencyCode,
 				currencies: this.getCurrenciesForPicker(),
-				feedback: undefined
+				feedback: undefined,
+				disableTouch: false
 			};
 			//Page d'inscription
 		} else {
@@ -52,7 +53,8 @@ export default class SignUpScreen extends Component {
 				password: "",
 				currencyCode: getObjects("Currency")[0].code,
 				currencies: this.getCurrenciesForPicker(),
-				feedback: undefined
+				feedback: undefined,
+				disableTouch: false
 			};
 		}
 	};
@@ -122,6 +124,11 @@ export default class SignUpScreen extends Component {
 		//En cas d'erreur pas de redirection
 		if (type === "error") {
 			this.setState({ feedback: { type: type, title: title, text: text } });
+			setTimeout(() => {
+				this.setState({
+					feedback: undefined
+				});
+			}, 2000);
 		} else {
 			//Si succès redirection vers la page de connexion ou account
 			const nextScreen = this.state.pageTitle === "Inscription" ? "SignIn" : "Account";
@@ -134,6 +141,15 @@ export default class SignUpScreen extends Component {
 		}
 	};
 
+	disableTouch = () => {
+		this.setState({ disableTouch: true });
+		setTimeout(() => {
+			this.setState({
+				disableTouch: false
+			});
+		}, 2000);
+	};
+
 	render() {
 		return (
 			<View style={{ flex: 1 }}>
@@ -142,7 +158,7 @@ export default class SignUpScreen extends Component {
 					{/* TextInput pour login */}
 					<View>
 						<Divider styleName="section-header custom-divider">
-							<Caption>Choisissez un identifiant</Caption>
+							<Caption>Identifiant (obligatoire)</Caption>
 						</Divider>
 						<View styleName="horizontal">
 							<TextInput
@@ -150,7 +166,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.login}
 								placeholder={"Exemple : login"}
-								onChangeText={login => this.setState({ login: login, feedback: undefined })}
+								onChangeText={login => this.setState({ login: login })}
 							/>
 							{this.state.login !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -163,7 +179,7 @@ export default class SignUpScreen extends Component {
 					{/* TextInput pour nom */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
-							<Caption>Entrez votre nom (facultatif)</Caption>
+							<Caption>Nom (facultatif)</Caption>
 						</Divider>
 						<View styleName="horizontal">
 							<TextInput
@@ -171,7 +187,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.lastName}
 								placeholder={"Exemple : Contador"}
-								onChangeText={lastName => this.setState({ lastName: lastName, feedback: undefined })}
+								onChangeText={lastName => this.setState({ lastName: lastName })}
 							/>
 							{this.state.lastName !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -184,7 +200,7 @@ export default class SignUpScreen extends Component {
 					{/* TextInput pour prénom */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
-							<Caption>Entrez votre prénom (facultatif)</Caption>
+							<Caption>Prénom (facultatif)</Caption>
 						</Divider>
 						<View styleName="horizontal">
 							<TextInput
@@ -192,7 +208,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.firstName}
 								placeholder={"Exemple : Alberto"}
-								onChangeText={firstName => this.setState({ firstName: firstName, feedback: undefined })}
+								onChangeText={firstName => this.setState({ firstName: firstName })}
 							/>
 							{this.state.firstName !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -205,7 +221,7 @@ export default class SignUpScreen extends Component {
 					{/* TextInput pour mot de passe */}
 					<View style={{ marginTop: 25 }}>
 						<Divider styleName="section-header custom-divider">
-							<Caption>Choisissez un mot de passe</Caption>
+							<Caption>Mot de passe (obligatoire)</Caption>
 						</Divider>
 						<View styleName="horizontal">
 							<TextInput
@@ -213,7 +229,7 @@ export default class SignUpScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.password}
 								placeholder={"Exemple : *Mdp19Fort/"}
-								onChangeText={password => this.setState({ password: password, feedback: undefined })}
+								onChangeText={password => this.setState({ password: password })}
 							/>
 							{this.state.password !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -226,7 +242,7 @@ export default class SignUpScreen extends Component {
 					{/* Picker pour monnaie de l'utilisateur */}
 					<View style={{ marginTop: 25, alignItems: "center" }}>
 						<Divider styleName="section-header custom-divider">
-							<Caption>Sélectionnez la devise que vous préférez</Caption>
+							<Caption>Devise préférée</Caption>
 						</Divider>
 						<View
 							style={{
@@ -244,9 +260,7 @@ export default class SignUpScreen extends Component {
 									flex: 1
 								}}
 								selectedValue={this.state.currencyCode}
-								onValueChange={(itemValue, itemIndex) =>
-									this.setState({ currencyCode: itemValue, feedback: undefined })
-								}
+								onValueChange={(itemValue, itemIndex) => this.setState({ currencyCode: itemValue })}
 							>
 								{this.state.currencies}
 							</Picker>
@@ -256,8 +270,10 @@ export default class SignUpScreen extends Component {
 					{/* Bouton inscription */}
 					<View style={{ marginTop: 35, marginBottom: 20, alignItems: "center" }}>
 						<Button
+							disabled={this.state.disableTouch}
 							styleName="connect"
 							onPress={() => {
+								this.disableTouch();
 								this.signUpOrUpdate();
 							}}
 						>

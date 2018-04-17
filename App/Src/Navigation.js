@@ -9,13 +9,14 @@ import HomeScreen from "./Screens/Home";
 import UserTripsScreen from "./Screens/UserTrips";
 import UserDatasScreen from "./Screens/UsersDatas";
 import UserAccountScreen from "./Screens/UserAccount";
+import TripScreen from "./Screens/Trip";
+import LegOfTripScreen from "./Screens/LegOfTrip";
 
 //Écrans inclus dans AuthStack
 import SignInScreen from "./Screens/SignIn";
 import SignUpScreen from "./Screens/SignUp";
 
 //Écrans disponibles partout dans l'app
-import ModalMessageBoxComponent from "./Components/MessageBoxModal";
 import AuthLoadingScreen from "./Screens/AuthLoading";
 
 //StackNavigator utilisé pour la connexion et l'inscription
@@ -28,6 +29,34 @@ const AuthStack = StackNavigator(
 		navigationOptions: {
 			header: null
 		}
+	}
+);
+
+const HomeStack = StackNavigator(
+	{
+		Home: { screen: HomeScreen },
+		HomeTrip: { screen: TripScreen },
+		HomeLegOfTrip: { screen: LegOfTripScreen }
+	},
+	{
+		navigationOptions: {
+			header: null
+		},
+		initialRouteName: "Home"
+	}
+);
+
+const TripStack = StackNavigator(
+	{
+		UserTrips: { screen: UserTripsScreen },
+		Trip: { screen: TripScreen },
+		LegOfTrip: { screen: LegOfTripScreen }
+	},
+	{
+		navigationOptions: {
+			header: null
+		},
+		initialRouteName: "UserTrips"
 	}
 );
 
@@ -49,7 +78,7 @@ const AccountStack = StackNavigator(
 const AppTab = TabNavigator(
 	{
 		Home: {
-			screen: HomeScreen,
+			screen: HomeStack,
 			navigationOptions: {
 				tabBarLabel: "Accueil",
 				tabBarIcon: ({ focused, tintColor }) => {
@@ -58,9 +87,9 @@ const AppTab = TabNavigator(
 			}
 		},
 		Trip: {
-			screen: UserTripsScreen,
+			screen: TripStack,
 			navigationOptions: {
-				tabBarLabel: "Mes voyages",
+				tabBarLabel: "Voyages",
 				tabBarIcon: ({ focused, tintColor }) => {
 					return <Icon name="map-signs" size={22} color={tintColor} />;
 				}
@@ -69,7 +98,7 @@ const AppTab = TabNavigator(
 		UsersDatas: {
 			screen: UserDatasScreen,
 			navigationOptions: {
-				tabBarLabel: "Données voyages",
+				tabBarLabel: "Données",
 				tabBarIcon: ({ focused, tintColor }) => {
 					return <Icon name="database" size={22} color={tintColor} />;
 				}
@@ -105,7 +134,6 @@ const AppTab = TabNavigator(
 //Navigation exporté dans TripProject
 export const Navigation = SwitchNavigator(
 	{
-		Modal: ModalMessageBoxComponent,
 		AuthLoading: AuthLoadingScreen,
 		Auth: AuthStack,
 		App: AppTab

@@ -6,9 +6,15 @@ import Icon from "react-native-vector-icons/FontAwesome";
 
 import SpinnerComponent from "../Components/Spinner";
 import NabBarComponent from "../Components/NavBar";
+import DropdownComponent from "../Components/DropdownAlert";
 
 import { getConnectedUser, getConnectedUserTokens } from "../../DataAccess/ObjectsRepositories/UserRepository";
-import { findNextOrCurrentTrip } from "../../DataAccess/ObjectsRepositories/TripRepository";
+import {
+	findNextOrCurrentTrip,
+	getTrip,
+	getLegsOfTripInformation
+} from "../../DataAccess/ObjectsRepositories/TripRepository";
+import { getDateToString } from "../../Functions";
 
 export default class HomeScreen extends Component {
 	constructor(props) {
@@ -18,7 +24,8 @@ export default class HomeScreen extends Component {
 			titleOfHeadBanner: "Pas de voyages prévus...",
 			tripPeriod: undefined,
 			tripInformation: undefined,
-			refreshing: false
+			refreshing: false,
+			feedback: this.checkIfFeedback()
 		};
 		this.setInitialState();
 	}
@@ -52,6 +59,38 @@ export default class HomeScreen extends Component {
 		}
 	};
 
+	//Permet d'afficher un message après l'ajout d'un utilisateur
+	checkIfFeedback = () => {
+		//Ces paramètres sont envoyés par la page SignUp
+		//Vaut withFeedback si défini et false sinon
+		const withFeedback = this.props.navigation.getParam("withFeedback", false);
+		if (withFeedback === true) {
+			const { params } = this.props.navigation.state;
+			setTimeout(() => {
+				this.setState({
+					feedback: undefined
+				});
+			}, 2000);
+			return { type: params.type, title: params.title, text: params.text };
+		}
+	};
+
+	getLegsOfTripFromTrip = () => {
+		const user = getConnectedUser(this.state.userTokens.login, this.state.userTokens.password);
+		const trip = getTrip(
+			user,
+			this.state.tripInformation.title,
+			this.state.tripInformation.dateOfArrival,
+			this.state.tripInformation.dateOfDeparture
+		);
+
+		console.log(this.state.userTokens);
+		console.log(user);
+		console.log(this.state.tripInformation);
+
+		return getLegsOfTripInformation(trip);
+	};
+
 	onRefresh() {
 		this.setState({ refreshing: true });
 		this.setTripState();
@@ -79,7 +118,8 @@ export default class HomeScreen extends Component {
 									<Title>{this.state.tripInformation.title}</Title>
 									<Subtitle styleName="legs-of-trips">{this.state.tripInformation.legsOfTrip}</Subtitle>
 									<Subtitle styleName="period">
-										Du {this.state.tripInformation.dateOfArrival} au {this.state.tripInformation.dateOfDeparture}
+										Du {getDateToString(this.state.tripInformation.dateOfArrival)} au{" "}
+										{getDateToString(this.state.tripInformation.dateOfDeparture)}
 									</Subtitle>
 									<Text styleName={"value"} style={{ marginTop: 45 }}>
 										{this.state.tripInformation.totalBudget.totalBudgetSpent}{" "}
@@ -89,7 +129,24 @@ export default class HomeScreen extends Component {
 									</Text>
 									<Text styleName={"legend"}>(Budget dépensé / Budget plannifié)</Text>
 									{this.state.tripPeriod === "coming" ? (
-										<Button style={{ marginTop: 35 }}>
+										<Button
+											style={{ marginTop: 35 }}
+											onPress={() => {
+												this.props.navigation.navigate("HomeTrip", {
+													isNewTrip: false,
+													userTokens: this.state.userTokens,
+													trip: {
+														legsOfTrip: this.getLegsOfTripFromTrip(),
+														lastState: {
+															title: this.state.tripInformation.title,
+															dateOfArrival: this.state.tripInformation.dateOfArrival,
+															dateOfDeparture: this.state.tripInformation.dateOfDeparture
+														}
+													},
+													callingScreen: "Home"
+												});
+											}}
+										>
 											<Text style={{ marginRight: 20 }}>Modifier mon voyage</Text>
 											<EntypoIcon name="aircraft" size={25} color="white" />
 										</Button>
@@ -113,7 +170,14 @@ export default class HomeScreen extends Component {
 								</Overlay>
 							) : (
 								<Overlay styleName="image-overlay center">
-									<Button>
+									<Button
+										onPress={() => {
+											this.navigation.navigate("HomeTrip", {
+												userTokens: this.state.userTokens,
+												callingScreen: "Home"
+											});
+										}}
+									>
 										<Text style={{ marginRight: 20 }}>Ajouter un voyage</Text>
 										<EntypoIcon name="circle-with-plus" color="white" size={25} />
 									</Button>
@@ -124,6 +188,7 @@ export default class HomeScreen extends Component {
 							)}
 						</ImageBackground>
 					</ScrollView>
+					<DropdownComponent feedbackProps={this.state.feedback} />
 				</View>
 			);
 		}
