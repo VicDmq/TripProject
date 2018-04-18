@@ -130,3 +130,14 @@ const getStatisticsProperties = budgets => {
 		return {};
 	}
 };
+
+export const getBudgetForecastByCategory = (townName, category, typeOfBudget) => {
+	const request = "name='" + townName + "'";
+	const town = getObjectsFiltered("Town", request)[0];
+
+	const budgetForecast = town.budgetForecast.find(budgetForecast => {
+		if (budgetForecast.type === typeOfBudget) return true;
+	});
+
+	return budgetForecast["statisticsFor" + category];
+};

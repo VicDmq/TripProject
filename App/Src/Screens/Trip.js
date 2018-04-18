@@ -19,7 +19,7 @@ import SpinnerComponent from "../Components/Spinner";
 import DropdownAlertComponent from "../Components/DropdownAlert";
 
 import { getConnectedUserTokens, getConnectedUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
-import { getDateToString } from "../../Functions";
+import { getDateToString, isPeriodInsideOtherPeriod } from "../../Functions";
 import {
 	getTrip,
 	addLegOfTrip,
@@ -27,7 +27,8 @@ import {
 	updateLegOfTrip,
 	deleteLegOfTrip,
 	addTrip,
-	updateTrip
+	updateTrip,
+	getDatesOfTrip
 } from "../../DataAccess/ObjectsRepositories/TripRepository";
 import { getTownByNameAndCountryName } from "../../DataAccess/ObjectsRepositories/TownRepository";
 
@@ -79,6 +80,22 @@ export default class TripScreen extends Component {
 
 	updateLegsOfTripState = (legOfTrip, index = undefined) => {
 		const legsOfTrip = this.state.legsOfTrip;
+
+		//On vérifie que l'utilisateur n'a pas déjà entré une étape à cette période
+		legsOfTrip.forEach(legOfTripAlreadyAdd => {
+			if (
+				isPeriodInsideOtherPeriod(
+					legOfTripAlreadyAdd.dateOfArrival,
+					legOfTripAlreadyAdd.dateOfDeparture,
+					legOfTrip.dateOfArrival,
+					legOfTrip.dateOfDeparture
+				) &&
+				legsOfTrip.indexOf(legOfTripAlreadyAdd) !== index
+			) {
+				throw new Error("Vous serez déjà à " + legOfTripAlreadyAdd.townName + " durant cette période");
+			}
+		});
+
 		if (index !== undefined) {
 			legsOfTrip[index].dateOfArrival = legOfTrip.dateOfArrival;
 			legsOfTrip[index].dateOfDeparture = legOfTrip.dateOfDeparture;
@@ -99,15 +116,44 @@ export default class TripScreen extends Component {
 	};
 
 	onSaveOrUpdate = () => {
-		let legsOfTripLength = 0;
+		const user = getConnectedUser(this.state.userTokens.login, this.state.userTokens.password);
+
+		const legsOfTripArrayToCheckInputErrors = [];
+
 		this.state.legsOfTrip.forEach(legOfTrip => {
-			if (legOfTrip.status !== "willBeRemoved") legsOfTripLength++;
+			if (legOfTrip.status !== "willBeRemoved") legsOfTripArrayToCheckInputErrors.push(legOfTrip);
 		});
 
-		if (legsOfTripLength !== 0 && this.state.title !== "") {
-			const user = getConnectedUser(this.state.userTokens.login, this.state.userTokens.password);
+		const newDates = getDatesOfTrip(legsOfTripArrayToCheckInputErrors);
+
+		let type = "success";
+		let title = this.state.isNewTrip ? "Voyage ajouté !" : "Voyage mis à jour !";
+		let text = "Vous pouvez encore modifier ce voyage jusqu'au " + getDateToString(newDates.dateOfArrival);
+
+		if (legsOfTripArrayToCheckInputErrors.length === 0) {
+			type = "error";
+			title = "Sauvegarde impossible";
+			text = "Tous les champs obligatoires n'ont pas été remplis";
+		} else {
+			user.trips.forEach(trip => {
+				if (
+					isPeriodInsideOtherPeriod(
+						trip.dateOfArrival,
+						trip.dateOfDeparture,
+						newDates.dateOfArrival,
+						newDates.dateOfDeparture
+					) &&
+					trip.title !== this.state.lastState.title
+				) {
+					type = "error";
+					title = "Sauvegarde impossible";
+					text = 'Vous avez déjà programmé le voyage "' + trip.title + '" durant cette période';
+				}
+			});
+		}
+
+		if (type != "error") {
 			const newLegsOfTrip = [];
-			let newDateOfArrival = undefined;
 
 			if (this.state.isNewTrip) {
 				this.state.legsOfTrip.forEach(legOfTrip => {
@@ -116,7 +162,7 @@ export default class TripScreen extends Component {
 						addLegOfTrip(legOfTrip.dateOfArrival, legOfTrip.dateOfDeparture, realmTown, legOfTrip.typeOfBudget)
 					);
 				});
-				newDateOfArrival = addTrip(user, this.state.title, newLegsOfTrip).dateOfArrival;
+				addTrip(user, this.state.title, newLegsOfTrip).dateOfArrival;
 			} else {
 				const realmTrip = getTrip(
 					user,
@@ -163,21 +209,20 @@ export default class TripScreen extends Component {
 				});
 
 				updateTrip(realmTrip, this.state.title, newLegsOfTrip);
-				newDateOfArrival = realmTrip.dateOfArrival;
 			}
 
 			this.props.navigation.navigate(this.state.callingScreen, {
 				withFeedback: true,
-				type: "success",
-				title: this.state.isNewTrip ? "Voyage ajouté !" : "Voyage mis à jour !",
-				text: "Vous pouvez encore modifier ce voyage jusqu'au " + getDateToString(newDateOfArrival)
+				type: type,
+				title: title,
+				text: text
 			});
 		} else {
 			this.setState({
 				feedback: {
-					type: "error",
-					title: "Sauvegarde impossible",
-					text: "Tous les champs obligatoires n'ont pas été remplis"
+					type: type,
+					title: title,
+					text: text
 				}
 			});
 			setTimeout(() => {

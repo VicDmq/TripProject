@@ -42,3 +42,16 @@ export const getDateToString = date => {
 
 	return days[date.getDay()] + " " + date.getDate() + " " + months[date.getMonth()] + " " + date.getFullYear();
 };
+
+export const isPeriodInsideOtherPeriod = (dateBegin1, dateEnd1, dateBegin2, dateEnd2) => {
+	if (
+		(dateBegin1 - dateBegin2 <= 0 && dateEnd1 - dateBegin2 >= 0) ||
+		(dateBegin1 - dateEnd2 <= 0 && dateEnd1 - dateEnd2 >= 0) ||
+		(dateBegin1 - dateBegin2 >= 0 && dateEnd1 - dateEnd2 <= 0) ||
+		(dateBegin1 - dateBegin2 <= 0 && dateEnd1 - dateEnd2 >= 0)
+	) {
+		return true;
+	} else {
+		return false;
+	}
+};

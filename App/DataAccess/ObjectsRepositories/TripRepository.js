@@ -59,7 +59,7 @@ export const updateTrip = (trip, newTitle, newLegsOfTrip = []) => {
 };
 
 //Permet de calculer les dates de début et de fin d'un voyage en fonction des étapes
-const getDatesOfTrip = legsOfTrip => {
+export const getDatesOfTrip = legsOfTrip => {
 	let dateOfArrival = legsOfTrip[0].dateOfArrival;
 	let dateOfDeparture = legsOfTrip[0].dateOfDeparture;
 

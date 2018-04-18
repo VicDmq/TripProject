@@ -12,6 +12,7 @@
     "react-native": "0.54.0",
     "react-native-dropdownalert": "^3.4.0",
     "react-native-modal-datetime-picker": "^5.1.0",
+    "react-native-progress": "^3.4.0",
     "react-native-radio-buttons": "^1.0.0",
     "react-navigation": "^1.5.11",
     "realm": "^2.2.14"

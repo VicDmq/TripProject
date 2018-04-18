@@ -24,6 +24,7 @@ export default class HomeScreen extends Component {
 			titleOfHeadBanner: "Pas de voyages prévus...",
 			tripPeriod: undefined,
 			tripInformation: undefined,
+			currencySymbol: undefined,
 			refreshing: false,
 			feedback: this.checkIfFeedback()
 		};
@@ -49,7 +50,11 @@ export default class HomeScreen extends Component {
 			} else if (trip.period === "coming") {
 				this.setState({ titleOfHeadBanner: "Prochainement" });
 			}
-			this.setState({ tripPeriod: trip.period, tripInformation: trip.information });
+			this.setState({
+				tripPeriod: trip.period,
+				tripInformation: trip.information,
+				currencySymbol: user.currency.symbol
+			});
 		} else {
 			this.setState({
 				titleOfHeadBanner: "Pas de voyages prévus...",
@@ -122,10 +127,8 @@ export default class HomeScreen extends Component {
 										{getDateToString(this.state.tripInformation.dateOfDeparture)}
 									</Subtitle>
 									<Text styleName={"value"} style={{ marginTop: 45 }}>
-										{this.state.tripInformation.totalBudget.totalBudgetSpent}{" "}
-										{this.state.tripInformation.currencySymbol} /{" "}
-										{this.state.tripInformation.totalBudget.totalBudgetPlanned}{" "}
-										{this.state.tripInformation.currencySymbol}
+										{this.state.tripInformation.totalBudget.totalBudgetSpent} {this.state.currencySymbol} /{" "}
+										{this.state.tripInformation.totalBudget.totalBudgetPlanned} {this.state.currencySymbol}
 									</Text>
 									<Text styleName={"legend"}>(Budget dépensé / Budget plannifié)</Text>
 									{this.state.tripPeriod === "coming" ? (
@@ -151,13 +154,37 @@ export default class HomeScreen extends Component {
 											<EntypoIcon name="aircraft" size={25} color="white" />
 										</Button>
 									) : (
-										<Button style={{ marginTop: 35 }}>
+										<Button
+											style={{ marginTop: 35 }}
+											onPress={() => {
+												this.props.navigation.navigate("HomeBudget", {
+													userTokens: this.state.userTokens,
+													tripStateForAuth: {
+														title: this.state.tripInformation.title,
+														dateOfArrival: this.state.tripInformation.dateOfArrival,
+														dateOfDeparture: this.state.tripInformation.dateOfDeparture
+													}
+												});
+											}}
+										>
 											<Text style={{ marginRight: 20 }}>Mon budget</Text>
 											<Icon name="money" color="white" size={25} />
 										</Button>
 									)}
 									{this.state.tripPeriod === "coming" ? (
-										<Button style={{ marginTop: 15 }}>
+										<Button
+											style={{ marginTop: 15 }}
+											onPress={() => {
+												this.props.navigation.navigate("HomeBudget", {
+													userTokens: this.state.userTokens,
+													tripStateForAuth: {
+														title: this.state.tripInformation.title,
+														dateOfArrival: this.state.tripInformation.dateOfArrival,
+														dateOfDeparture: this.state.tripInformation.dateOfDeparture
+													}
+												});
+											}}
+										>
 											<Text style={{ marginRight: 20 }}>Modifier mon budget</Text>
 											<Icon name="money" color="white" size={25} />
 										</Button>

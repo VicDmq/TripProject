@@ -114,39 +114,56 @@ export default class LegOfTripScreen extends Component {
 	};
 
 	arrivalHandleDataPicked = date => {
-		if (date - this.state.dateOfDeparture > 0) {
+		const newDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+		if (newDate - this.state.dateOfDeparture >= 0) {
 			this.setState({
-				dateOfArrival: date,
-				dateOfDeparture: this.getDateOfNextDay(date),
+				dateOfArrival: newDate,
+				dateOfDeparture: this.getDateOfNextDay(newDate),
 				arrivalDateTimePickerVisible: false
 			});
 		} else {
-			this.setState({ dateOfArrival: date, arrivalDateTimePickerVisible: false });
+			this.setState({ dateOfArrival: newDate, arrivalDateTimePickerVisible: false });
 		}
 	};
 
 	departureHandleDatePicked = date => {
-		this.setState({ dateOfDeparture: date, departureDateTimePickerVisible: false });
+		const newDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+		this.setState({ dateOfDeparture: newDate, departureDateTimePickerVisible: false });
 	};
 
 	saveOrUpdate = () => {
 		if (this.state.townName !== "") {
-			this.state.updateLegsOfTrip(
-				{
-					dateOfArrival: this.state.dateOfArrival,
-					dateOfDeparture: this.state.dateOfDeparture,
-					countryName: this.state.countryName,
-					townName: this.state.townName,
-					typeOfBudget: this.state.typeOfBudget.value
-				},
-				this.state.index
-			);
-			this.props.navigation.goBack();
+			try {
+				this.state.updateLegsOfTrip(
+					{
+						dateOfArrival: this.state.dateOfArrival,
+						dateOfDeparture: this.state.dateOfDeparture,
+						countryName: this.state.countryName,
+						townName: this.state.townName,
+						typeOfBudget: this.state.typeOfBudget.value
+					},
+					this.state.index
+				);
+				this.props.navigation.goBack();
+			} catch (error) {
+				this.setState({
+					feedback: {
+						type: "error",
+						title: "Sauvegarde impossible",
+						text: error.message
+					}
+				});
+				setTimeout(() => {
+					this.setState({
+						feedback: undefined
+					});
+				}, 2000);
+			}
 		} else {
 			this.setState({
 				feedback: {
 					type: "error",
-					title: "Ajout impossible",
+					title: "Sauvegarde impossible",
 					text: "Tous les champs obligatoires n'ont pas été remplis"
 				}
 			});

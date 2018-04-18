@@ -13,6 +13,18 @@ const customTheme = {
 				fontWeight: "bold"
 			}
 		},
+		".small-headband": {
+			backgroundColor: "black",
+			alignItems: "center",
+			justifyContent: "center",
+			height: 22,
+			"shoutem.ui.Title": {
+				color: "white",
+				fontWeight: "bold",
+				fontSize: 13,
+				lineHeight: 15
+			}
+		},
 		backgroundColor: "white"
 	},
 	"shoutem.ui.TextInput": {
@@ -43,6 +55,16 @@ const customTheme = {
 			height: 55,
 			width: 55,
 			borderRadius: 50
+		},
+		".small-button": {
+			backgroundColor: "black",
+			height: 25,
+			width: 90,
+			borderRadius: 7,
+			".shoutem.ui.Text": {
+				fontSize: 8,
+				lineHeight: 12
+			}
 		},
 		"shoutem.ui.Text": {
 			color: "white",

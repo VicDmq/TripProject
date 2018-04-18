@@ -11,6 +11,8 @@ import UserDatasScreen from "./Screens/UsersDatas";
 import UserAccountScreen from "./Screens/UserAccount";
 import TripScreen from "./Screens/Trip";
 import LegOfTripScreen from "./Screens/LegOfTrip";
+import BudgetScreen from "./Screens/Budget";
+import UpdateBudgetScreen from "./Screens/UpdateBudget";
 
 //Écrans inclus dans AuthStack
 import SignInScreen from "./Screens/SignIn";
@@ -36,7 +38,9 @@ const HomeStack = StackNavigator(
 	{
 		Home: { screen: HomeScreen },
 		HomeTrip: { screen: TripScreen },
-		HomeLegOfTrip: { screen: LegOfTripScreen }
+		HomeLegOfTrip: { screen: LegOfTripScreen },
+		HomeBudget: { screen: BudgetScreen },
+		HomeUpdateBudget: { screen: UpdateBudgetScreen }
 	},
 	{
 		navigationOptions: {
