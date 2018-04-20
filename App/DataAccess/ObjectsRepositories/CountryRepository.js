@@ -1,6 +1,8 @@
 import { createObject } from "../Scripts/UpdateDatabase";
+import { getObjectsFiltered } from "../Scripts/Requests";
+
 import { RestCountriesDefault } from "../../Api/RestCountries/RestCountries";
-import { getObjectsFiltered, getObjects } from "../Scripts/Requests";
+
 import { updateCurrencySymbol } from "./CurrencyRepository";
 
 export const addCountry = (name, currency) => {

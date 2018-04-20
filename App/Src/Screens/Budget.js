@@ -20,10 +20,12 @@ import ProgressBar from "react-native-progress/Bar";
 
 import NavBarComponent from "../Components/NavBar";
 import SpinnerComponent from "../Components/Spinner";
+
 import { getConnectedUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
-import { getTrip } from "../../DataAccess/ObjectsRepositories/TripRepository";
+import { getTrip, getLegOfTrip } from "../../DataAccess/ObjectsRepositories/TripRepository";
 import { getCurrencyByCode } from "../../DataAccess/ObjectsRepositories/CurrencyRepository";
-import { convertToUserCurrency } from "../../Functions";
+import { convertToOtherCurrency } from "../../Functions";
+import { updateBudgetPlanned, updateTotalBudgetPlanned } from "../../DataAccess/ObjectsRepositories/BudgetRepository";
 
 export default class BudgetScreen extends Component {
 	constructor(props) {
@@ -43,38 +45,39 @@ export default class BudgetScreen extends Component {
 			params.tripStateForAuth.dateOfDeparture
 		);
 
-		const legsOfTripbudgets = this.getlegsOfTripBudgetsFromTrip(trip, user.currency);
+		const legsOfTrip = this.getlegsOfTripBudgetsFromTrip(trip, user.currency);
 
 		let pickerItems = [];
-		legsOfTripbudgets.forEach(legOfTrip => {
-			pickerItems.push(<Picker.Item key={legOfTrip.townName} label={legOfTrip.townName} value={legOfTrip} />);
+		legsOfTrip.forEach(legOfTrip => {
+			const index = legsOfTrip.indexOf(legOfTrip);
+			pickerItems.push(<Picker.Item key={legOfTrip.townName} label={legOfTrip.townName} value={index} />);
 		});
 
 		return {
 			userTokens: params.userTokens,
 			currencySymbol: user.currency.symbol,
 			tripStateForAuth: params.tripStateForAuth,
-			legsOfTripbudgets: legsOfTripbudgets,
+			legsOfTrip: legsOfTrip,
 			legsOfTripPicker: pickerItems,
-			legOfTripSelected: legsOfTripbudgets[0],
+			indexOfLegOfTripSelected: 0,
 			isEditable: isEditable
 		};
 	};
 
 	getlegsOfTripBudgetsFromTrip = (trip, userCurrency) => {
-		const legsOfTripbudgets = [];
+		const legsOfTrip = [];
 
 		trip.legsOfTrip.forEach(legOfTrip => {
 			const budgets = [
 				{
 					category: undefined,
 					name: "Budget total",
-					budgetSpent: convertToUserCurrency(
+					budgetSpent: convertToOtherCurrency(
 						legOfTrip.budget.totalBudgetSpent,
 						userCurrency,
 						legOfTrip.town.country.currency
 					),
-					budgetPlanned: convertToUserCurrency(
+					budgetPlanned: convertToOtherCurrency(
 						legOfTrip.budget.totalBudgetPlanned,
 						userCurrency,
 						legOfTrip.town.country.currency
@@ -95,12 +98,12 @@ export default class BudgetScreen extends Component {
 				budgets.push({
 					category: budgetByCategory.category,
 					name: budgetsByCategoryInFrench[budgetByCategory.category],
-					budgetSpent: convertToUserCurrency(
+					budgetSpent: convertToOtherCurrency(
 						budgetByCategory.budgetSpent,
 						userCurrency,
 						legOfTrip.town.country.currency
 					),
-					budgetPlanned: convertToUserCurrency(
+					budgetPlanned: convertToOtherCurrency(
 						budgetByCategory.budgetPlanned,
 						userCurrency,
 						legOfTrip.town.country.currency
@@ -108,7 +111,7 @@ export default class BudgetScreen extends Component {
 				});
 			});
 
-			legsOfTripbudgets.push({
+			legsOfTrip.push({
 				townName: legOfTrip.town.name,
 				currencyCode: legOfTrip.town.country.currency.code,
 				dateOfArrival: legOfTrip.dateOfArrival,
@@ -118,7 +121,41 @@ export default class BudgetScreen extends Component {
 			});
 		});
 
-		return legsOfTripbudgets;
+		return legsOfTrip;
+	};
+
+	updateBudgets = budgets => {
+		const user = getConnectedUser(this.state.userTokens.login, this.state.userTokens.password);
+		const tripStateForAuth = this.state.tripStateForAuth;
+		const legOfTrip = this.state.legsOfTrip[this.state.indexOfLegOfTripSelected];
+		const realmTrip = getTrip(
+			user,
+			tripStateForAuth.title,
+			tripStateForAuth.dateOfArrival,
+			tripStateForAuth.dateOfDeparture
+		);
+		const realmLegOfTrip = getLegOfTrip(
+			realmTrip,
+			legOfTrip.townName,
+			legOfTrip.dateOfArrival,
+			legOfTrip.dateOfDeparture
+		);
+
+		budgets.forEach(budget => {
+			const budgetPlanned = convertToOtherCurrency(
+				budget.budgetPlanned,
+				realmLegOfTrip.town.country.currency,
+				user.currency
+			);
+			updateBudgetPlanned(realmLegOfTrip.budget, budget.category, budgetPlanned);
+		});
+
+		updateTotalBudgetPlanned(realmLegOfTrip.budget);
+
+		const legsOfTrip = this.getlegsOfTripBudgetsFromTrip(realmTrip, user.currency);
+		this.setState({
+			legsOfTrip: legsOfTrip
+		});
 	};
 
 	getRatioForProgressBar = (budgetSpent, budgetPlanned) => {
@@ -134,12 +171,13 @@ export default class BudgetScreen extends Component {
 	renderRow = (rowData, sectionId, index) => {
 		if (index === "0") {
 			const budgetRatio = this.getRatioForProgressBar(rowData[0].budgetSpent, rowData[0].budgetPlanned);
+			const legOfTrip = this.state.legsOfTrip[this.state.indexOfLegOfTripSelected];
 			return (
 				<View style={{ width: 360, height: 280 }}>
 					<ImageBackground styleName={"image-home"} source={require("../Images/map.jpg")}>
 						<Overlay styleName="image-overlay start" style={{ width: 360, height: 220 }}>
 							<Title>{rowData[0].name}</Title>
-							<Subtitle styleName="period">Type de budget : {this.state.legOfTripSelected.typeOfBudget}</Subtitle>
+							<Subtitle styleName="period">Type de budget : {legOfTrip.typeOfBudget}</Subtitle>
 							<Text styleName="value" style={{ marginTop: 18 }}>
 								{rowData[0].budgetSpent} {this.state.currencySymbol} / {rowData[0].budgetPlanned}{" "}
 								{this.state.currencySymbol}
@@ -157,9 +195,10 @@ export default class BudgetScreen extends Component {
 							<Button
 								style={{ marginTop: 25, height: 38 }}
 								onPress={() => {
+									const legOfTrip = this.state.legsOfTrip[this.state.indexOfLegOfTripSelected];
 									this.props.navigation.navigate("HomeUpdateBudget", {
-										userTokens: this.state.userTokens,
-										legOfTrip: this.state.legOfTripSelected
+										updateBudgets: this.updateBudgets.bind(this),
+										legOfTrip: legOfTrip
 									});
 								}}
 							>
@@ -208,7 +247,8 @@ export default class BudgetScreen extends Component {
 
 	groupDataByRows = () => {
 		let isFirstArticle = true;
-		return GridRow.groupByRows(this.state.legOfTripSelected.budgets, 2, () => {
+		const legOfTrip = this.state.legsOfTrip[this.state.indexOfLegOfTripSelected];
+		return GridRow.groupByRows(legOfTrip.budgets, 2, () => {
 			if (isFirstArticle) {
 				isFirstArticle = false;
 				return 2;
@@ -240,8 +280,8 @@ export default class BudgetScreen extends Component {
 								style={{
 									flex: 1
 								}}
-								selectedValue={this.state.legOfTripSelected}
-								onValueChange={(itemValue, itemIndex) => this.setState({ legOfTripSelected: itemValue })}
+								selectedValue={this.state.indexOfLegOfTripSelected}
+								onValueChange={(itemValue, itemIndex) => this.setState({ indexOfLegOfTripSelected: itemValue })}
 							>
 								{this.state.legsOfTripPicker}
 							</Picker>

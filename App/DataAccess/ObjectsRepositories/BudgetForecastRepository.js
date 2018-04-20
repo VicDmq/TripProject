@@ -1,6 +1,9 @@
 import { updateObjectProperty } from "../Scripts/UpdateDatabase";
 import { getObjectsFiltered } from "../Scripts/Requests";
-import { roundTo2Decimals } from "../../Functions";
+
+import { roundTo2Decimals, getNbDaysBetween2Dates } from "../../Functions";
+
+import { getTownByNameAndCountryName } from "./TownRepository";
 
 export const updateBudgetForecast = (town, typeOfBudget) => {
 	const request = "town.name ='" + town.name + "' AND budget.typeOfBudget='" + typeOfBudget + "'";
@@ -18,7 +21,7 @@ export const updateBudgetForecast = (town, typeOfBudget) => {
 
 	for (var i = 0; i < legsOfTrip.length; i++) {
 		const budget = legsOfTrip[i].budget;
-		const nbDay = Math.floor((legsOfTrip[i].dateOfDeparture - legsOfTrip[i].dateOfArrival) / 86400000);
+		const nbDay = getNbDaysBetween2Dates(legsOfTrip[i].dateOfDeparture, legsOfTrip[i].dateOfDeparture);
 		//Nb de jours passés nécessaires pour uniformiser les données
 
 		//Se fait une fois le voyage terminé et si l'utilisateur a inséré des données
@@ -131,13 +134,17 @@ const getStatisticsProperties = budgets => {
 	}
 };
 
-export const getBudgetForecastByCategory = (townName, category, typeOfBudget) => {
-	const request = "name='" + townName + "'";
-	const town = getObjectsFiltered("Town", request)[0];
+//Cette fonction permet de récupérer les estimations calculées d'une ville suivant une catégorie
+//de dépenses et d'un type de budget
+export const getBudgetForecastByCategory = (townName, countryName, category, typeOfBudget) => {
+	//On récupère l'objet correspondant à la ville
+	const town = getTownByNameAndCountryName(townName, countryName);
 
+	//On récupère l'estimation correspondant au type de budget
 	const budgetForecast = town.budgetForecast.find(budgetForecast => {
 		if (budgetForecast.type === typeOfBudget) return true;
 	});
 
+	//On retourne l'estimation correspondant à la catégorie de dépenses
 	return budgetForecast["statisticsFor" + category];
 };

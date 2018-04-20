@@ -1,6 +1,7 @@
 import { createObject, updateObjectProperty } from "../Scripts/UpdateDatabase";
-import { getRatesFromEuro, getCodes } from "../../Api/Fixer/Fixer";
 import { getObjects, getObjectsFiltered } from "../Scripts/Requests";
+
+import { getRatesFromEuro, getCodes } from "../../Api/Fixer/Fixer";
 
 //Création d'une monnaie avec rates = valeur optionnel
 //Cela permet de ne faire qu'une seule fois la requête à l'api
@@ -49,7 +50,7 @@ export const updateCurrenciesValues = async () => {
 
 //Création de toutes les monnaies disponibles sur l'API
 //Remarque : les noms sont en anglais
-export const updateCurrenciesFromApi = async () => {
+export const createCurrenciesFromApi = async () => {
 	let codes = await getCodes();
 	//Formatage du JSON
 	codes = eval(codes);

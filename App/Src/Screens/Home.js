@@ -199,7 +199,7 @@ export default class HomeScreen extends Component {
 								<Overlay styleName="image-overlay center">
 									<Button
 										onPress={() => {
-											this.navigation.navigate("HomeTrip", {
+											this.props.navigation.navigate("HomeTrip", {
 												userTokens: this.state.userTokens,
 												callingScreen: "Home"
 											});

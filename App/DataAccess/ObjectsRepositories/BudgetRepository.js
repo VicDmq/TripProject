@@ -48,15 +48,26 @@ export const addExpenditure = (budget, category, price = 0, date = new Date(), j
 	updateObjectProperty(budget, "totalBudgetSpent", totalBudgetSpent);
 };
 
+//Fonction qui permet de changer la valeur du budget plannifié pour une catégorie de dépenses
 export const updateBudgetPlanned = (budget, category, budgetPlanned) => {
 	const budgetByCategory = budget.budgetsByCategory.filter(
 		budgetByCategory => budgetByCategory.category === category
 	)[0];
 
 	updateObjectProperty(budgetByCategory, "budgetPlanned", budgetPlanned);
-	updateObjectProperty(budget, "budgetPlanned", budget.budgetPlanned + budgetPlanned);
 };
 
+//Fonction qui permet de mettre à jour la valeur du budget plannifié total en fonction
+//des différentes catégories de dépenses
+export const updateTotalBudgetPlanned = budget => {
+	let totalBudgetPlanned = 0;
+	budget.budgetsByCategory.forEach(budgetByCategory => {
+		totalBudgetPlanned += budgetByCategory.budgetPlanned;
+	});
+	updateObjectProperty(budget, "totalBudgetPlanned", totalBudgetPlanned);
+};
+
+//Changer le type de budget (petit, moyen, gros)
 export const updateTypeOfBudget = (budget, typeOfBudget) => {
 	updateObjectProperty(budget, "typeOfBudget", typeOfBudget);
 };

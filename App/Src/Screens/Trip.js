@@ -407,29 +407,39 @@ export default class TripScreen extends Component {
 							) : null}
 						</View>
 					</ScrollView>
-					{this.state.isEditable === true ? (
-						<View
-							style={{
-								alignItems: "center",
-								paddingTop: 10,
-								paddingBottom: 10,
-								borderTopWidth: 1,
-								borderTopColor: "lightgrey"
+
+					<View
+						style={{
+							alignItems: "center",
+							paddingTop: 10,
+							paddingBottom: 10,
+							borderTopWidth: 1,
+							borderTopColor: "lightgrey"
+						}}
+					>
+						<Button
+							disabled={this.state.disableTouch}
+							styleName={this.state.isEditable === true ? "connect" : "create-account"}
+							onPress={() => {
+								this.disableTouch();
+								if (this.state.isEditable === true) this.onSaveOrUpdate();
+								else {
+									this.props.navigation.navigate("HomeBudget", {
+										userTokens: this.state.userTokens,
+										tripStateForAuth: {
+											title: this.state.lastState.title,
+											dateOfArrival: this.state.lastState.dateOfArrival,
+											dateOfDeparture: this.state.lastState.dateOfDeparture
+										}
+									});
+								}
 							}}
 						>
-							<Button
-								disabled={this.state.disableTouch}
-								styleName="connect"
-								onPress={() => {
-									this.disableTouch();
-									this.onSaveOrUpdate();
-								}}
-							>
-								<Text>Sauvegarder</Text>
-								<Icon name="checkbox-on" />
-							</Button>
-						</View>
-					) : null}
+							<Text>Sauvegarder</Text>
+							<Icon name="checkbox-on" />
+						</Button>
+					</View>
+
 					<DropdownAlertComponent feedbackProps={this.state.feedback} />
 				</View>
 			);

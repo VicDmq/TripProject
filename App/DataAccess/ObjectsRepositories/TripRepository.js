@@ -1,6 +1,6 @@
 import { createObject, addObjectToPropertyList, updateObjectProperty, deleteObject } from "../Scripts/UpdateDatabase";
 import { addBudget, updateTypeOfBudget } from "./BudgetRepository";
-import { getDateToString, convertToUserCurrency } from "../../Functions";
+import { convertToOtherCurrency } from "../../Functions";
 
 //Création d'un voyage d'un utilisateur avec potentiellement plusieurs étapes
 export const addTrip = (user, title, legsOfTrip) => {
@@ -94,15 +94,20 @@ export const findNextOrCurrentTrip = user => {
 	while (!returnThisTrip && i < trips.length) {
 		const trip = trips[i];
 
-		if (trip.dateOfArrival - dateOfToday <= 0 && trip.dateOfDeparture - dateOfToday >= 0) {
-			returnThisTrip = true;
-			nextOrCurrentTrip = trip;
-			comingOrNow = "now";
-		} else if (nextOrCurrentTrip === undefined || trip.dateOfArrival - nextOrCurrentTrip.dateOfArrival < 0) {
-			nextOrCurrentTrip = trip;
-			comingOrNow = "coming";
+		//Si ce voyage n'est pas déjà passé
+		if (trip.dateOfDeparture - dateOfToday > 0) {
+			//Si ce voyage se déroule actuellement
+			if (trip.dateOfArrival - dateOfToday <= 0 && trip.dateOfDeparture - dateOfToday >= 0) {
+				returnThisTrip = true;
+				nextOrCurrentTrip = trip;
+				comingOrNow = "now";
+			}
+			//S'il n'y a pas encore eu de voyage choisi ou que le voyage est plus proche dans le temps que celui choisi actuellement
+			else if (nextOrCurrentTrip === undefined || trip.dateOfArrival - nextOrCurrentTrip.dateOfArrival < 0) {
+				nextOrCurrentTrip = trip;
+				comingOrNow = "coming";
+			}
 		}
-
 		i++;
 	}
 
@@ -127,13 +132,13 @@ const setTripInformationInJSON = (trip, userCurrency) => {
 	trip.legsOfTrip.forEach(legOfTrip => {
 		legsOfTripTownToString += legOfTrip.town.name + " - ";
 		//On convertit dans la monnaie de l'utilisateur puis on l'ajoute au total
-		totalBudget.totalBudgetSpent += convertToUserCurrency(
+		totalBudget.totalBudgetSpent += convertToOtherCurrency(
 			legOfTrip.budget.totalBudgetSpent,
 			userCurrency,
 			legOfTrip.town.country.currency
 		);
 		//On convertit dans la monnaie de l'utilisateur puis on l'ajoute au total
-		totalBudget.totalBudgetPlanned += convertToUserCurrency(
+		totalBudget.totalBudgetPlanned += convertToOtherCurrency(
 			legOfTrip.budget.totalBudgetPlanned,
 			userCurrency,
 			legOfTrip.town.country.currency
@@ -170,10 +175,13 @@ export const getLegOfTrip = (trip, townName, dateOfArrival, dateOfDeparture) => 
 	});
 };
 
+//Permet de récupérer des informations sur une étape d'un voyage sous un format JSON
+//Cette fonction est utilisé par la page Trip pour envoyer ces données à LegOfTripScreen
 export const getLegsOfTripInformation = trip => {
 	const legsOfTrip = [];
 
 	trip.legsOfTrip.forEach(legOfTrip => {
+		console.log(legOfTrip);
 		legsOfTrip.push({
 			status: "toUpdate",
 			lastStateForAuth: {

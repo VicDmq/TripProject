@@ -1,4 +1,5 @@
 const Realm = require("realm");
+//Import des schémas définissant la structure (nom et propriétés) des objets
 import {
 	userSchema,
 	tripSchema,
@@ -13,6 +14,7 @@ import {
 	currencySchema
 } from "./DataSchemas";
 
+//Création de la base de donnée : on récupère un objet que l'on exporte par la suite
 export const realm = new Realm({
 	path: "newRealm",
 	schema: [
