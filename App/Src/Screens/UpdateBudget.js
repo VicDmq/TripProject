@@ -5,8 +5,10 @@ import { View, Divider, TextInput, TouchableOpacity, Icon, Caption, Text, Button
 import SpinnerComponent from "../Components/Spinner";
 import NavBarComponent from "../Components/NavBar";
 import DropdownAlertComponent from "../Components/DropdownAlert";
+import BudgetForecastModalComponent from "../Components/BudgetForecastModal";
 
 import { getBudgetForecastByCategory } from "../../DataAccess/ObjectsRepositories/BudgetForecastRepository";
+import { getTownByNameAndCountryName } from "../../DataAccess/ObjectsRepositories/TownRepository";
 
 export default class UpdateBudgetScreen extends Component {
 	constructor(props) {
@@ -27,6 +29,7 @@ export default class UpdateBudgetScreen extends Component {
 					budgetPlanned: budget.budgetPlanned,
 					budgetForecast: getBudgetForecastByCategory(
 						params.legOfTrip.townName,
+						params.legOfTrip.countryName,
 						budget.category,
 						params.legOfTrip.typeOfBudget
 					)
@@ -34,9 +37,13 @@ export default class UpdateBudgetScreen extends Component {
 			}
 		});
 
+		console.log(getTownByNameAndCountryName(params.legOfTrip.townName, params.legOfTrip.countryName));
+
 		return {
 			updateBudgets: params.updateBudgets,
-			budgets: budgets
+			budgets: budgets,
+			modalIsVisible: false,
+			modalProps: undefined
 		};
 	};
 
@@ -65,13 +72,24 @@ export default class UpdateBudgetScreen extends Component {
 								const budgets = this.state.budgets;
 								const index = budgets.indexOf(budget);
 								const newBudgetPlanned = text.replace(/[^0-9]/g, "");
-								budgets[index].budgetPlanned = parseInt(newBudgetPlanned);
+								budgets[index].budgetPlanned = parseInt(newBudgetPlanned) ? parseInt(newBudgetPlanned) : 0;
 								this.setState({
 									budgets: budgets
 								});
 							}}
 						/>
-						<TouchableOpacity style={{ flex: 0.3 }} onPress={() => {}}>
+						<TouchableOpacity
+							style={{ flex: 0.3 }}
+							onPress={() => {
+								this.setState({
+									modalIsVisible: true,
+									modalProps: {
+										name: budget.name,
+										statistics: budget.budgetForecast
+									}
+								});
+							}}
+						>
 							<Icon name="events" />
 						</TouchableOpacity>
 					</View>
@@ -82,8 +100,11 @@ export default class UpdateBudgetScreen extends Component {
 		return textInputs;
 	};
 
+	hideModal = () => {
+		this.setState({ modalIsVisible: false });
+	};
+
 	render() {
-		console.log(this.state.budgets[0]);
 		if (this.state.budgets === undefined) {
 			return <SpinnerComponent />;
 		} else {
@@ -91,6 +112,11 @@ export default class UpdateBudgetScreen extends Component {
 				<View style={{ flex: 1 }}>
 					<NavBarComponent title={"Modification budget"} backButton={true} />
 					<ScrollView>
+						<BudgetForecastModalComponent
+							isVisible={this.state.modalIsVisible}
+							hideModal={this.hideModal}
+							budgetForecast={this.state.modalProps}
+						/>
 						{this.renderTextInputs()}
 						<View style={{ alignItems: "center", marginTop: 20 }}>
 							<Button

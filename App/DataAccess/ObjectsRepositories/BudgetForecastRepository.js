@@ -21,7 +21,7 @@ export const updateBudgetForecast = (town, typeOfBudget) => {
 
 	for (var i = 0; i < legsOfTrip.length; i++) {
 		const budget = legsOfTrip[i].budget;
-		const nbDay = getNbDaysBetween2Dates(legsOfTrip[i].dateOfDeparture, legsOfTrip[i].dateOfDeparture);
+		const nbDay = getNbDaysBetween2Dates(legsOfTrip[i].dateOfArrival, legsOfTrip[i].dateOfDeparture);
 		//Nb de jours passés nécessaires pour uniformiser les données
 
 		//Se fait une fois le voyage terminé et si l'utilisateur a inséré des données

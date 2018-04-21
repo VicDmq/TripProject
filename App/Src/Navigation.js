@@ -54,7 +54,8 @@ const TripStack = StackNavigator(
 	{
 		UserTrips: { screen: UserTripsScreen },
 		Trip: { screen: TripScreen },
-		LegOfTrip: { screen: LegOfTripScreen }
+		LegOfTrip: { screen: LegOfTripScreen },
+		Budget: { screen: BudgetScreen }
 	},
 	{
 		navigationOptions: {

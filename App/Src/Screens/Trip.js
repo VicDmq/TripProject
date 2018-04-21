@@ -13,6 +13,7 @@ import {
 	Row,
 	Subtitle
 } from "@shoutem/ui";
+import IconFontAwesome from "react-native-vector-icons/FontAwesome";
 
 import NavBarComponent from "../Components/NavBar";
 import SpinnerComponent from "../Components/Spinner";
@@ -419,24 +420,29 @@ export default class TripScreen extends Component {
 					>
 						<Button
 							disabled={this.state.disableTouch}
-							styleName={this.state.isEditable === true ? "connect" : "create-account"}
+							styleName={this.state.isEditable === true ? "connect" : "blue-button"}
 							onPress={() => {
 								this.disableTouch();
 								if (this.state.isEditable === true) this.onSaveOrUpdate();
 								else {
-									this.props.navigation.navigate("HomeBudget", {
+									this.props.navigation.navigate("Budget", {
 										userTokens: this.state.userTokens,
 										tripStateForAuth: {
 											title: this.state.lastState.title,
 											dateOfArrival: this.state.lastState.dateOfArrival,
 											dateOfDeparture: this.state.lastState.dateOfDeparture
-										}
+										},
+										isEditable: false
 									});
 								}
 							}}
 						>
-							<Text>Sauvegarder</Text>
-							<Icon name="checkbox-on" />
+							{this.state.isEditable === true ? <Text>Sauvegarder</Text> : <Text>Mon budget</Text>}
+							{this.state.isEditable === true ? (
+								<Icon name="checkbox-on" />
+							) : (
+								<IconFontAwesome name="money" color="white" size={20} style={{ marginLeft: 8, marginRight: 5 }} />
+							)}
 						</Button>
 					</View>
 

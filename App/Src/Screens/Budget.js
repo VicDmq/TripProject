@@ -35,7 +35,7 @@ export default class BudgetScreen extends Component {
 
 	updateStateFromProps = () => {
 		const { params } = this.props.navigation.state;
-		const isEditable = this.props.navigation.getParam("isEditable", false);
+		const isEditable = this.props.navigation.getParam("isEditable", true);
 
 		const user = getConnectedUser(params.userTokens.login, params.userTokens.password);
 		const trip = getTrip(
@@ -113,6 +113,7 @@ export default class BudgetScreen extends Component {
 
 			legsOfTrip.push({
 				townName: legOfTrip.town.name,
+				countryName: legOfTrip.town.country.name,
 				currencyCode: legOfTrip.town.country.currency.code,
 				dateOfArrival: legOfTrip.dateOfArrival,
 				dateOfDeparture: legOfTrip.dateOfDeparture,
@@ -185,26 +186,28 @@ export default class BudgetScreen extends Component {
 							<ProgressBar
 								progress={budgetRatio}
 								style={{ marginTop: 5 }}
-								color={budgetRatio >= 1 ? "red" : "lightgreen"}
+								color={budgetRatio >= 1 ? "red" : "green"}
 								width={225}
 								height={18}
 								borderRadius={20}
 								borderColor={"white"}
 								borderWidth={2}
 							/>
-							<Button
-								style={{ marginTop: 25, height: 38 }}
-								onPress={() => {
-									const legOfTrip = this.state.legsOfTrip[this.state.indexOfLegOfTripSelected];
-									this.props.navigation.navigate("HomeUpdateBudget", {
-										updateBudgets: this.updateBudgets.bind(this),
-										legOfTrip: legOfTrip
-									});
-								}}
-							>
-								<Text style={{ marginRight: 20 }}>Modifier mes prévisions</Text>
-								<Icon name="money" color="white" size={22} />
-							</Button>
+							{this.state.isEditable === true ? (
+								<Button
+									style={{ marginTop: 25, height: 38 }}
+									onPress={() => {
+										const legOfTrip = this.state.legsOfTrip[this.state.indexOfLegOfTripSelected];
+										this.props.navigation.navigate("HomeUpdateBudget", {
+											updateBudgets: this.updateBudgets.bind(this),
+											legOfTrip: legOfTrip
+										});
+									}}
+								>
+									<Text style={{ marginRight: 20 }}>Modifier mes prévisions</Text>
+									<Icon name="money" color="white" size={22} />
+								</Button>
+							) : null}
 						</Overlay>
 					</ImageBackground>
 				</View>
@@ -226,11 +229,11 @@ export default class BudgetScreen extends Component {
 							<ProgressBar
 								progress={budgetRatio}
 								style={{ marginTop: 5 }}
-								color={budgetRatio >= 1 ? "red" : "lightgreen"}
+								color={budgetRatio >= 1 ? "red" : "green"}
 								width={120}
 								height={12}
 								borderRadius={20}
-								borderColor={budgetRatio >= 1 ? "red" : "lightgreen"}
+								borderColor={budgetRatio >= 1 ? "red" : "lightgrey"}
 								borderWidth={1}
 							/>
 							<Button styleName={"small-button"} style={{ marginTop: 7 }}>

@@ -25,6 +25,27 @@ const customTheme = {
 				lineHeight: 15
 			}
 		},
+		".modal-view": {
+			height: 300,
+			width: 300,
+			borderRadius: 20,
+			borderColor: "black",
+			borderWidth: 2,
+			alignItems: "center"
+		},
+		".modal-view-title": {
+			borderBottomColor: "lightgrey",
+			borderBottomWidth: 1,
+			width: 250,
+			alignItems: "center",
+			justifyContent: "center",
+			height: 40,
+			"shoutem.ui.Title": {
+				fontSize: 18,
+				lineHeight: 20,
+				fontWeight: "bold"
+			}
+		},
 		backgroundColor: "white"
 	},
 	"shoutem.ui.TextInput": {
@@ -47,6 +68,11 @@ const customTheme = {
 		},
 		".create-account": {
 			backgroundColor: "black",
+			height: 40,
+			width: 150
+		},
+		".blue-button": {
+			backgroundColor: "blue",
 			height: 40,
 			width: 150
 		},

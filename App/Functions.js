@@ -25,7 +25,11 @@ export const roundTo2Decimals = valueToRound => {
 
 //Calcule le nombre de jours d'une période délimitée par deux dates
 export const getNbDaysBetween2Dates = (date1, date2) => {
-	return Math.floor((date1 - date2) / 86400000);
+	//86 400 000 = 1000*60*60*24 (nombre de millisecondes dans une journée)
+	//date1 - date2 donne la différence en millisecondes
+	//On rajoute +1, car toutes les dates ont pour heure 00h, donc la dernière journée n'est pas prise en
+	//compte si on ne rajoute pas +1
+	return Math.abs(Math.floor((date1 - date2) / 86400000)) + 1;
 };
 
 //Retourne une date à un certain format
