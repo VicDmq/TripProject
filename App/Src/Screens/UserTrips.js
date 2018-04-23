@@ -3,7 +3,6 @@ import { View, Text, ListView, Subtitle, Icon, TouchableOpacity, Button, Row } f
 
 import SpinnerComponent from "../Components/Spinner";
 import NavBarComponent from "../Components/NavBar";
-import DropdownAlertComponent from "../Components/DropdownAlert";
 
 import { getConnectedUserTokens, getConnectedUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
 import { getDateToString } from "../../Functions";
@@ -15,8 +14,7 @@ export default class UserTripsScreen extends Component {
 		this.state = {
 			userTokens: undefined,
 			trips: [],
-			disableTouch: false,
-			feedback: undefined
+			disableTouch: false
 		};
 		this.setInitialState();
 	}
@@ -36,23 +34,7 @@ export default class UserTripsScreen extends Component {
 			trips.push({ title: trip.title, dateOfArrival: trip.dateOfArrival, dateOfDeparture: trip.dateOfDeparture });
 		});
 
-		this.setState({ trips: trips, feedback: this.checkIfFeedback() });
-	};
-
-	//Permet d'afficher un message après l'ajout d'un utilisateur
-	checkIfFeedback = () => {
-		//Ces paramètres sont envoyés par la page SignUp
-		//Vaut withFeedback si défini et false sinon
-		const withFeedback = this.props.navigation.getParam("withFeedback", false);
-		if (withFeedback === true) {
-			const { params } = this.props.navigation.state;
-			setTimeout(() => {
-				this.setState({
-					feedback: undefined
-				});
-			}, 2000);
-			return { type: params.type, title: params.title, text: params.text };
-		}
+		this.setState({ trips: trips });
 	};
 
 	getLegsOfTripFromTrip = trip => {
@@ -89,7 +71,8 @@ export default class UserTripsScreen extends Component {
 									dateOfArrival: trip.dateOfArrival,
 									dateOfDeparture: trip.dateOfDeparture
 								}
-							}
+							},
+							refreshCallingScreen: this.refreshScreen
 						});
 					}
 				}}
@@ -117,6 +100,10 @@ export default class UserTripsScreen extends Component {
 		}, 2000);
 	};
 
+	refreshScreen = () => {
+		this.getUserTrips();
+	};
+
 	render() {
 		if (this.state.userTokens === undefined || this.state.trips === undefined) {
 			return <SpinnerComponent />;
@@ -138,7 +125,6 @@ export default class UserTripsScreen extends Component {
 							<Icon name="plus-button" />
 						</Button>
 					</View>
-					<DropdownAlertComponent feedbackProps={this.state.feedback} />
 				</View>
 			);
 		}

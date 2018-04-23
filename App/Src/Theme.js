@@ -26,7 +26,7 @@ const customTheme = {
 			}
 		},
 		".modal-view": {
-			height: 300,
+			height: 350,
 			width: 300,
 			borderRadius: 20,
 			borderColor: "black",

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Icon, TouchableOpacity, View, Overlay, Button } from "@shoutem/ui";
 import { withNavigation } from "react-navigation";
 
+//Bouton affiché sur la barre de navigation : permet de retourner sur la page précédente
 class BackButtonComponent extends Component {
 	constructor(props) {
 		super(props);
@@ -22,4 +23,5 @@ class BackButtonComponent extends Component {
 	}
 }
 
+//Nécessaire pour avoir accès à la props "navigation"
 export default withNavigation(BackButtonComponent);

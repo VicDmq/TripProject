@@ -48,7 +48,9 @@ export default class TripScreen extends Component {
 				navBarTitle: "Nouveau voyage",
 				userTokens: params.userTokens,
 				callingScreen: callingScreen,
+				refreshCallingScreen: params.refreshCallingScreen,
 				isNewTrip: true,
+				lastState: undefined,
 				title: "",
 				legsOfTrip: [],
 				deleteMode: {
@@ -57,13 +59,15 @@ export default class TripScreen extends Component {
 				},
 				disableTouch: false,
 				feedback: undefined,
-				isEditable: true
+				isEditable: true,
+				needToBeSaved: true
 			};
 		} else {
 			return {
 				navBarTitle: "Mon voyage",
 				userTokens: params.userTokens,
 				callingScreen: callingScreen,
+				refreshCallingScreen: params.refreshCallingScreen,
 				isNewTrip: false,
 				lastState: params.trip.lastState,
 				title: params.trip.lastState.title,
@@ -74,7 +78,8 @@ export default class TripScreen extends Component {
 				},
 				disableTouch: false,
 				feedback: undefined,
-				isEditable: params.trip.lastState.dateOfArrival - new Date() > 0 ? true : false
+				isEditable: params.trip.lastState.dateOfArrival - new Date() > 0 ? true : false,
+				needToBeSaved: false
 			};
 		}
 	};
@@ -113,29 +118,28 @@ export default class TripScreen extends Component {
 				typeOfBudget: legOfTrip.typeOfBudget
 			});
 		}
-		this.setState({ legsOfTrip: legsOfTrip });
+		this.setState({ legsOfTrip: legsOfTrip, needToBeSaved: true });
 	};
 
 	onSaveOrUpdate = () => {
 		const user = getConnectedUser(this.state.userTokens.login, this.state.userTokens.password);
 
 		const legsOfTripArrayToCheckInputErrors = [];
+		let type = undefined;
+		let title = undefined;
+		let text = undefined;
 
 		this.state.legsOfTrip.forEach(legOfTrip => {
 			if (legOfTrip.status !== "willBeRemoved") legsOfTripArrayToCheckInputErrors.push(legOfTrip);
 		});
-
-		const newDates = getDatesOfTrip(legsOfTripArrayToCheckInputErrors);
-
-		let type = "success";
-		let title = this.state.isNewTrip ? "Voyage ajouté !" : "Voyage mis à jour !";
-		let text = "Vous pouvez encore modifier ce voyage jusqu'au " + getDateToString(newDates.dateOfArrival);
 
 		if (legsOfTripArrayToCheckInputErrors.length === 0) {
 			type = "error";
 			title = "Sauvegarde impossible";
 			text = "Tous les champs obligatoires n'ont pas été remplis";
 		} else {
+			const newDates = getDatesOfTrip(legsOfTripArrayToCheckInputErrors);
+
 			user.trips.forEach(trip => {
 				if (
 					isPeriodInsideOtherPeriod(
@@ -144,7 +148,7 @@ export default class TripScreen extends Component {
 						newDates.dateOfArrival,
 						newDates.dateOfDeparture
 					) &&
-					trip.title !== this.state.lastState.title
+					(this.state.isNewTrip === true || trip.title !== this.state.lastState.title)
 				) {
 					type = "error";
 					title = "Sauvegarde impossible";
@@ -155,15 +159,30 @@ export default class TripScreen extends Component {
 
 		if (type != "error") {
 			const newLegsOfTrip = [];
-
 			if (this.state.isNewTrip) {
+				const legsOfTripNewState = [];
 				this.state.legsOfTrip.forEach(legOfTrip => {
 					const realmTown = getTownByNameAndCountryName(legOfTrip.townName, legOfTrip.countryName);
 					newLegsOfTrip.push(
 						addLegOfTrip(legOfTrip.dateOfArrival, legOfTrip.dateOfDeparture, realmTown, legOfTrip.typeOfBudget)
 					);
+					legOfTrip.status = "toUpdate";
+					legsOfTripNewState.push(legOfTrip);
 				});
-				addTrip(user, this.state.title, newLegsOfTrip).dateOfArrival;
+				const newTrip = addTrip(user, this.state.title, newLegsOfTrip);
+				this.setState({
+					isNewTrip: false,
+					lastState: {
+						title: this.state.title,
+						dateOfArrival: newTrip.dateOfArrival,
+						dateOfDeparture: newTrip.dateOfDeparture
+					},
+					legsOfTrip: legsOfTripNewState
+				});
+
+				type = "success";
+				title = "Voyage ajouté !";
+				text = "Vous pouvez encore modifier ce voyage jusqu'au " + getDateToString(newTrip.dateOfArrival);
 			} else {
 				const realmTrip = getTrip(
 					user,
@@ -210,14 +229,31 @@ export default class TripScreen extends Component {
 				});
 
 				updateTrip(realmTrip, this.state.title, newLegsOfTrip);
+
+				this.setState({
+					lastState: {
+						title: realmTrip.title,
+						dateOfArrival: realmTrip.dateOfArrival,
+						dateOfDeparture: realmTrip.dateOfDeparture
+					}
+				});
+				type = "success";
+				title = "Voyage ajouté !";
+				text = "Vous pouvez encore modifier ce voyage jusqu'au " + getDateToString(realmTrip.dateOfArrival);
 			}
 
-			this.props.navigation.navigate(this.state.callingScreen, {
-				withFeedback: true,
-				type: type,
-				title: title,
-				text: text
+			this.setState({
+				feedback: {
+					type: type,
+					title: title,
+					text: text
+				},
+				needToBeSaved: false
 			});
+			setTimeout(() => {
+				this.setState({ feedback: undefined });
+			}, 2000);
+			this.state.refreshCallingScreen();
 		} else {
 			this.setState({
 				feedback: {
@@ -318,7 +354,11 @@ export default class TripScreen extends Component {
 					legsOfTrip.splice(index, 1);
 				}
 			});
-			this.setState({ deleteMode: { value: false, legsOfTripIndexesToDelete: [] }, legsOfTrip: legsOfTrip });
+			this.setState({
+				deleteMode: { value: false, legsOfTripIndexesToDelete: [] },
+				legsOfTrip: legsOfTrip,
+				needToBeSaved: true
+			});
 		} else {
 			this.setState({ deleteMode: { value: true, legsOfTripIndexesToDelete: [] } });
 		}
@@ -351,7 +391,7 @@ export default class TripScreen extends Component {
 								style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
 								value={this.state.title}
 								placeholder={"Titre de votre voyage ?"}
-								onChangeText={title => this.setState({ title: title })}
+								onChangeText={title => this.setState({ title: title, needToBeSaved: true })}
 							/>
 							{this.state.title !== "" ? (
 								<Icon style={{ flex: 0.3, color: "green" }} name="checkbox-on" />
@@ -418,34 +458,42 @@ export default class TripScreen extends Component {
 							borderTopColor: "lightgrey"
 						}}
 					>
-						<Button
-							disabled={this.state.disableTouch}
-							styleName={this.state.isEditable === true ? "connect" : "blue-button"}
-							onPress={() => {
-								this.disableTouch();
-								if (this.state.isEditable === true) this.onSaveOrUpdate();
-								else {
-									this.props.navigation.navigate("Budget", {
+						{this.state.needToBeSaved === true ? (
+							<Button
+								disabled={this.state.disableTouch}
+								styleName="connect"
+								onPress={() => {
+									this.disableTouch();
+									this.onSaveOrUpdate();
+								}}
+							>
+								<Text>Sauvegarder</Text>
+								<Icon name="checkbox-on" />
+							</Button>
+						) : (
+							<Button
+								disabled={this.state.disableTouch}
+								styleName="create-account"
+								onPress={() => {
+									this.disableTouch();
+									this.props.navigation.navigate(this.state.callingScreen === "Home" ? "HomeBudget" : "Budget", {
 										userTokens: this.state.userTokens,
 										tripStateForAuth: {
 											title: this.state.lastState.title,
 											dateOfArrival: this.state.lastState.dateOfArrival,
 											dateOfDeparture: this.state.lastState.dateOfDeparture
 										},
-										isEditable: false
+										callingScreen: this.state.callingScreen,
+										refreshCallingScreen:
+											this.state.callingScreen === "Home" ? this.state.refreshCallingScreen : undefined
 									});
-								}
-							}}
-						>
-							{this.state.isEditable === true ? <Text>Sauvegarder</Text> : <Text>Mon budget</Text>}
-							{this.state.isEditable === true ? (
-								<Icon name="checkbox-on" />
-							) : (
+								}}
+							>
+								<Text>Mon budget</Text>
 								<IconFontAwesome name="money" color="white" size={20} style={{ marginLeft: 8, marginRight: 5 }} />
-							)}
-						</Button>
+							</Button>
+						)}
 					</View>
-
 					<DropdownAlertComponent feedbackProps={this.state.feedback} />
 				</View>
 			);

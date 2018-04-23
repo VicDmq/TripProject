@@ -20,6 +20,7 @@ import ProgressBar from "react-native-progress/Bar";
 
 import NavBarComponent from "../Components/NavBar";
 import SpinnerComponent from "../Components/Spinner";
+import DropdownAlertComponent from "../Components/DropdownAlert";
 
 import { getConnectedUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
 import { getTrip, getLegOfTrip } from "../../DataAccess/ObjectsRepositories/TripRepository";
@@ -35,7 +36,6 @@ export default class BudgetScreen extends Component {
 
 	updateStateFromProps = () => {
 		const { params } = this.props.navigation.state;
-		const isEditable = this.props.navigation.getParam("isEditable", true);
 
 		const user = getConnectedUser(params.userTokens.login, params.userTokens.password);
 		const trip = getTrip(
@@ -45,7 +45,7 @@ export default class BudgetScreen extends Component {
 			params.tripStateForAuth.dateOfDeparture
 		);
 
-		const legsOfTrip = this.getlegsOfTripBudgetsFromTrip(trip, user.currency);
+		const legsOfTrip = this.getLegsOfTripFromTrip(trip, user.currency);
 
 		let pickerItems = [];
 		legsOfTrip.forEach(legOfTrip => {
@@ -55,16 +55,19 @@ export default class BudgetScreen extends Component {
 
 		return {
 			userTokens: params.userTokens,
+			callingScreen: params.callingScreen,
 			currencySymbol: user.currency.symbol,
 			tripStateForAuth: params.tripStateForAuth,
 			legsOfTrip: legsOfTrip,
 			legsOfTripPicker: pickerItems,
 			indexOfLegOfTripSelected: 0,
-			isEditable: isEditable
+			disableTouch: false,
+			refreshCallingScreen: params.refreshCallingScreen,
+			feedback: undefined
 		};
 	};
 
-	getlegsOfTripBudgetsFromTrip = (trip, userCurrency) => {
+	getLegsOfTripFromTrip = (trip, userCurrency) => {
 		const legsOfTrip = [];
 
 		trip.legsOfTrip.forEach(legOfTrip => {
@@ -118,7 +121,8 @@ export default class BudgetScreen extends Component {
 				dateOfArrival: legOfTrip.dateOfArrival,
 				dateOfDeparture: legOfTrip.dateOfDeparture,
 				typeOfBudget: legOfTrip.budget.typeOfBudget,
-				budgets: budgets
+				budgets: budgets,
+				budgetIsEditable: new Date() - legOfTrip.dateOfArrival < 0 ? true : false
 			});
 		});
 
@@ -153,10 +157,20 @@ export default class BudgetScreen extends Component {
 
 		updateTotalBudgetPlanned(realmLegOfTrip.budget);
 
-		const legsOfTrip = this.getlegsOfTripBudgetsFromTrip(realmTrip, user.currency);
+		if (this.state.callingScreen === "Home") this.state.refreshCallingScreen();
+
+		const legsOfTrip = this.getLegsOfTripFromTrip(realmTrip, user.currency);
 		this.setState({
-			legsOfTrip: legsOfTrip
+			legsOfTrip: legsOfTrip,
+			feedback: {
+				type: "success",
+				title: "Budget plannifié mis à jour",
+				text: "Rappel : vous ne pourrez plus le modifier une fois le voyage commencé"
+			}
 		});
+		setTimeout(() => {
+			this.setState({ feedback: undefined });
+		}, 2000);
 	};
 
 	getRatioForProgressBar = (budgetSpent, budgetPlanned) => {
@@ -193,15 +207,21 @@ export default class BudgetScreen extends Component {
 								borderColor={"white"}
 								borderWidth={2}
 							/>
-							{this.state.isEditable === true ? (
+							{legOfTrip.budgetIsEditable === true ? (
 								<Button
+									disabled={this.state.disableTouch}
 									style={{ marginTop: 25, height: 38 }}
 									onPress={() => {
+										this.disableTouch();
 										const legOfTrip = this.state.legsOfTrip[this.state.indexOfLegOfTripSelected];
-										this.props.navigation.navigate("HomeUpdateBudget", {
-											updateBudgets: this.updateBudgets.bind(this),
-											legOfTrip: legOfTrip
-										});
+										this.props.navigation.navigate(
+											this.state.callingScreen === "Home" ? "HomeUpdateBudget" : "UpdateBudget",
+											{
+												userTokens: this.state.userTokens,
+												updateBudgets: this.updateBudgets.bind(this),
+												legOfTrip: legOfTrip
+											}
+										);
 									}}
 								>
 									<Text style={{ marginRight: 20 }}>Modifier mes prévisions</Text>
@@ -236,7 +256,14 @@ export default class BudgetScreen extends Component {
 								borderColor={budgetRatio >= 1 ? "red" : "lightgrey"}
 								borderWidth={1}
 							/>
-							<Button styleName={"small-button"} style={{ marginTop: 7 }}>
+							<Button
+								disabled={this.state.disableTouch}
+								styleName={"small-button"}
+								style={{ marginTop: 7 }}
+								onPress={() => {
+									this.disableTouch();
+								}}
+							>
 								<Text>Dépenses</Text>
 							</Button>
 						</View>
@@ -258,6 +285,15 @@ export default class BudgetScreen extends Component {
 			}
 			return 1;
 		});
+	};
+
+	disableTouch = () => {
+		this.setState({ disableTouch: true });
+		setTimeout(() => {
+			this.setState({
+				disableTouch: false
+			});
+		}, 2000);
 	};
 
 	render() {
@@ -294,6 +330,7 @@ export default class BudgetScreen extends Component {
 							<ListView data={this.groupDataByRows()} renderRow={this.renderRow} />
 						</View>
 					</View>
+					<DropdownAlertComponent feedbackProps={this.state.feedback} />
 				</View>
 			);
 		}

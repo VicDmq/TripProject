@@ -25,8 +25,9 @@ export default class HomeScreen extends Component {
 			tripPeriod: undefined,
 			tripInformation: undefined,
 			currencySymbol: undefined,
+			feedback: undefined,
 			refreshing: false,
-			feedback: this.checkIfFeedback()
+			disableTouch: false
 		};
 		this.setInitialState();
 	}
@@ -64,22 +65,6 @@ export default class HomeScreen extends Component {
 		}
 	};
 
-	//Permet d'afficher un message après l'ajout d'un utilisateur
-	checkIfFeedback = () => {
-		//Ces paramètres sont envoyés par la page SignUp
-		//Vaut withFeedback si défini et false sinon
-		const withFeedback = this.props.navigation.getParam("withFeedback", false);
-		if (withFeedback === true) {
-			const { params } = this.props.navigation.state;
-			setTimeout(() => {
-				this.setState({
-					feedback: undefined
-				});
-			}, 2000);
-			return { type: params.type, title: params.title, text: params.text };
-		}
-	};
-
 	getLegsOfTripFromTrip = () => {
 		const user = getConnectedUser(this.state.userTokens.login, this.state.userTokens.password);
 		const trip = getTrip(
@@ -89,18 +74,23 @@ export default class HomeScreen extends Component {
 			this.state.tripInformation.dateOfDeparture
 		);
 
-		console.log(this.state.userTokens);
-		console.log(user);
-		console.log(this.state.tripInformation);
-
 		return getLegsOfTripInformation(trip);
 	};
 
-	onRefresh() {
+	refreshScreen = () => {
 		this.setState({ refreshing: true });
 		this.setTripState();
 		this.setState({ refreshing: false });
-	}
+	};
+
+	disableTouch = () => {
+		this.setState({ disableTouch: true });
+		setTimeout(() => {
+			this.setState({
+				disableTouch: false
+			});
+		}, 2000);
+	};
 
 	render() {
 		if (this.state.userTokens === undefined) {
@@ -110,7 +100,9 @@ export default class HomeScreen extends Component {
 				<View style={{ flex: 1 }}>
 					<NabBarComponent title={"Accueil"} logoutButton={true} />
 					<ScrollView
-						refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.onRefresh.bind(this)} />}
+						refreshControl={
+							<RefreshControl refreshing={this.state.refreshing} onRefresh={this.refreshScreen.bind(this)} />
+						}
 						contentContainerStyle={{ flex: 1 }}
 					>
 						<View styleName="headband">
@@ -133,8 +125,10 @@ export default class HomeScreen extends Component {
 									<Text styleName={"legend"}>(Budget dépensé / Budget plannifié)</Text>
 									{this.state.tripPeriod === "coming" ? (
 										<Button
+											disabled={this.state.disableTouch}
 											style={{ marginTop: 35 }}
 											onPress={() => {
+												this.disableTouch();
 												this.props.navigation.navigate("HomeTrip", {
 													isNewTrip: false,
 													userTokens: this.state.userTokens,
@@ -146,7 +140,8 @@ export default class HomeScreen extends Component {
 															dateOfDeparture: this.state.tripInformation.dateOfDeparture
 														}
 													},
-													callingScreen: "Home"
+													callingScreen: "Home",
+													refreshCallingScreen: this.refreshScreen
 												});
 											}}
 										>
@@ -155,15 +150,19 @@ export default class HomeScreen extends Component {
 										</Button>
 									) : (
 										<Button
+											disabled={this.state.disableTouch}
 											style={{ marginTop: 35 }}
 											onPress={() => {
+												this.disableTouch();
 												this.props.navigation.navigate("HomeBudget", {
 													userTokens: this.state.userTokens,
 													tripStateForAuth: {
 														title: this.state.tripInformation.title,
 														dateOfArrival: this.state.tripInformation.dateOfArrival,
 														dateOfDeparture: this.state.tripInformation.dateOfDeparture
-													}
+													},
+													callingScreen: "Home",
+													refreshCallingScreen: this.refreshScreen
 												});
 											}}
 										>
@@ -173,15 +172,19 @@ export default class HomeScreen extends Component {
 									)}
 									{this.state.tripPeriod === "coming" ? (
 										<Button
+											disabled={this.state.disableTouch}
 											style={{ marginTop: 15 }}
 											onPress={() => {
+												this.disableTouch();
 												this.props.navigation.navigate("HomeBudget", {
 													userTokens: this.state.userTokens,
 													tripStateForAuth: {
 														title: this.state.tripInformation.title,
 														dateOfArrival: this.state.tripInformation.dateOfArrival,
 														dateOfDeparture: this.state.tripInformation.dateOfDeparture
-													}
+													},
+													callingScreen: "Home",
+													refreshCallingScreen: this.refreshScreen
 												});
 											}}
 										>
@@ -189,7 +192,13 @@ export default class HomeScreen extends Component {
 											<Icon name="money" color="white" size={25} />
 										</Button>
 									) : (
-										<Button style={{ marginTop: 15 }}>
+										<Button
+											disabled={this.state.disableTouch}
+											style={{ marginTop: 15 }}
+											onPress={() => {
+												this.disableTouch();
+											}}
+										>
 											<Text style={{ marginRight: 20 }}>Ajouter une dépense</Text>
 											<EntypoIcon name="circle-with-plus" color="white" size={25} />
 										</Button>
@@ -198,7 +207,9 @@ export default class HomeScreen extends Component {
 							) : (
 								<Overlay styleName="image-overlay center">
 									<Button
+										disabled={this.state.disableTouch}
 										onPress={() => {
+											this.disableTouch();
 											this.props.navigation.navigate("HomeTrip", {
 												userTokens: this.state.userTokens,
 												callingScreen: "Home"

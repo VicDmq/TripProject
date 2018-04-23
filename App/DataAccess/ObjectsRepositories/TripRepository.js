@@ -95,7 +95,7 @@ export const findNextOrCurrentTrip = user => {
 		const trip = trips[i];
 
 		//Si ce voyage n'est pas déjà passé
-		if (trip.dateOfDeparture - dateOfToday > 0) {
+		if (trip.dateOfDeparture - dateOfToday >= 0) {
 			//Si ce voyage se déroule actuellement
 			if (trip.dateOfArrival - dateOfToday <= 0 && trip.dateOfDeparture - dateOfToday >= 0) {
 				returnThisTrip = true;

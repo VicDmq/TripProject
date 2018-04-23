@@ -9,6 +9,7 @@ import BudgetForecastModalComponent from "../Components/BudgetForecastModal";
 
 import { getBudgetForecastByCategory } from "../../DataAccess/ObjectsRepositories/BudgetForecastRepository";
 import { getTownByNameAndCountryName } from "../../DataAccess/ObjectsRepositories/TownRepository";
+import { getConnectedUser } from "../../DataAccess/ObjectsRepositories/UserRepository";
 
 export default class UpdateBudgetScreen extends Component {
 	constructor(props) {
@@ -21,6 +22,8 @@ export default class UpdateBudgetScreen extends Component {
 
 		const budgets = [];
 
+		const user = getConnectedUser(params.userTokens.login, params.userTokens.password);
+
 		params.legOfTrip.budgets.forEach(budget => {
 			if (budget.category !== undefined) {
 				budgets.push({
@@ -31,19 +34,20 @@ export default class UpdateBudgetScreen extends Component {
 						params.legOfTrip.townName,
 						params.legOfTrip.countryName,
 						budget.category,
-						params.legOfTrip.typeOfBudget
+						params.legOfTrip.typeOfBudget,
+						user.currency
 					)
 				});
 			}
 		});
 
-		console.log(getTownByNameAndCountryName(params.legOfTrip.townName, params.legOfTrip.countryName));
-
 		return {
 			updateBudgets: params.updateBudgets,
+			currencySymbol: user.currency.symbol,
 			budgets: budgets,
 			modalIsVisible: false,
-			modalProps: undefined
+			modalProps: undefined,
+			disableTouch: false
 		};
 	};
 
@@ -66,8 +70,8 @@ export default class UpdateBudgetScreen extends Component {
 						<TextInput
 							keyboardType="numeric"
 							styleName="small-height"
-							style={{ flex: 0.7, marginLeft: 25, marginRight: 5 }}
-							value={budget.budgetPlanned.toString()}
+							style={{ flex: 0.7, marginLeft: 50, marginRight: 15, textAlign: "center" }}
+							value={budget.budgetPlanned.toString() + " " + this.state.currencySymbol}
 							onChangeText={text => {
 								const budgets = this.state.budgets;
 								const index = budgets.indexOf(budget);
@@ -90,7 +94,7 @@ export default class UpdateBudgetScreen extends Component {
 								});
 							}}
 						>
-							<Icon name="events" />
+							<Icon name="about" />
 						</TouchableOpacity>
 					</View>
 				</View>
@@ -102,6 +106,15 @@ export default class UpdateBudgetScreen extends Component {
 
 	hideModal = () => {
 		this.setState({ modalIsVisible: false });
+	};
+
+	disableTouch = () => {
+		this.setState({ disableTouch: true });
+		setTimeout(() => {
+			this.setState({
+				disableTouch: false
+			});
+		}, 2000);
 	};
 
 	render() {
@@ -118,10 +131,12 @@ export default class UpdateBudgetScreen extends Component {
 							budgetForecast={this.state.modalProps}
 						/>
 						{this.renderTextInputs()}
-						<View style={{ alignItems: "center", marginTop: 20 }}>
+						<View style={{ alignItems: "center", marginTop: 20, marginBottom: 20 }}>
 							<Button
+								disableTouch={this.state.disableTouch}
 								styleName="connect"
 								onPress={() => {
+									this.disableTouch();
 									this.onSave();
 								}}
 							>

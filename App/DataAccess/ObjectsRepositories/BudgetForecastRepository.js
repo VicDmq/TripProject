@@ -1,7 +1,7 @@
 import { updateObjectProperty } from "../Scripts/UpdateDatabase";
 import { getObjectsFiltered } from "../Scripts/Requests";
 
-import { roundTo2Decimals, getNbDaysBetween2Dates } from "../../Functions";
+import { roundTo2Decimals, getNbDaysBetween2Dates, convertToOtherCurrency } from "../../Functions";
 
 import { getTownByNameAndCountryName } from "./TownRepository";
 
@@ -136,7 +136,7 @@ const getStatisticsProperties = budgets => {
 
 //Cette fonction permet de récupérer les estimations calculées d'une ville suivant une catégorie
 //de dépenses et d'un type de budget
-export const getBudgetForecastByCategory = (townName, countryName, category, typeOfBudget) => {
+export const getBudgetForecastByCategory = (townName, countryName, category, typeOfBudget, userCurrency) => {
 	//On récupère l'objet correspondant à la ville
 	const town = getTownByNameAndCountryName(townName, countryName);
 
@@ -145,6 +145,29 @@ export const getBudgetForecastByCategory = (townName, countryName, category, typ
 		if (budgetForecast.type === typeOfBudget) return true;
 	});
 
-	//On retourne l'estimation correspondant à la catégorie de dépenses
-	return budgetForecast["statisticsFor" + category];
+	//On récupère l'estimation correspondant à la catégorie de dépenses
+	const statistics = budgetForecast["statisticsFor" + category];
+
+	return {
+		statisticsAreDefined: statistics.statisticsAreDefined,
+		avgBudgetSpent:
+			convertToOtherCurrency(statistics.avgBudgetSpent, town.country.currency, userCurrency) +
+			" " +
+			userCurrency.symbol,
+		avgBudgetPlanned:
+			convertToOtherCurrency(statistics.avgBudgetPlanned, town.country.currency, userCurrency) +
+			" " +
+			userCurrency.symbol,
+		minBudgetSpent:
+			convertToOtherCurrency(statistics.minBudgetSpent, town.country.currency, userCurrency) +
+			" " +
+			userCurrency.symbol,
+		maxBudgetSpent:
+			convertToOtherCurrency(statistics.maxBudgetSpent, town.country.currency, userCurrency) +
+			" " +
+			userCurrency.symbol,
+		stdDeviation: statistics.stdDeviation,
+		stdErrorWithForecast: statistics.stdErrorWithForecast ? statistics.stdErrorWithForecast : 0,
+		numberOfForecast: statistics.numberOfForecast
+	};
 };
